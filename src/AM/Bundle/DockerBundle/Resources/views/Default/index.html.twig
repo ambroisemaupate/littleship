@@ -1,0 +1,18 @@
+Hello !
+
+{% if error is defined %}
+<p class="alert error">{{ error }}</p>
+{% endif %}
+
+
+{% for container in containers %}
+<li class="container">
+    <p class="id">{{ container.id }}</p>
+    {% if container.name is defined %}
+    <p class="name">{{ container.name }}</p>
+    {% endif %}
+    <p class="image">{{ container.config.Image }}</p>
+    <date class="created">{{ container.data.Created|localizeddate('medium', 'short') }}</date>
+</li>
+{{ dump(container) }}
+{% endfor %}

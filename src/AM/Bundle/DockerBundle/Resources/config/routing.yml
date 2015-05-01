@@ -1,0 +1,7 @@
+am_docker_homepage:
+    path:     /
+    defaults: { _controller: AMDockerBundle:Default:index }
+
+am_docker_imagespage:
+    path:     /images
+    defaults: { _controller: AMDockerBundle:Default:images }

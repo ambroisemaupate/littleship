@@ -1,0 +1,10 @@
+
+
+<ul class="images">
+    {% for image in images %}
+    <li class="image">
+        <p class="repository">{{ image.repository }}</p>
+        <p class="tag">{{ image.tag }}</p>
+    </li>
+    {% endfor %}
+</ul>

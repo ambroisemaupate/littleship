@@ -1,0 +1,18 @@
+parameters:
+    docker_entrypoint: 'unix:///var/run/docker.sock'
+
+services:
+    docker.client:
+        class: Docker\Http\DockerClient
+        arguments:
+            - []
+            - %docker_entrypoint%
+            - ~
+            - false
+    docker:
+        class: Docker\Docker
+        arguments:
+            - @docker.client
+#    am_docker.example:
+#        class: AM\Bundle\DockerBundle\Example
+#        arguments: [@service_id, "plain_value", %parameter%]
