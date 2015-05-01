@@ -15,8 +15,9 @@ class DefaultController extends Controller
         $containerManager = $docker->getContainerManager();
 
         $assignation = [];
-        $assignation['containers'] = $containerManager->findAll();
-        $assignation['images'] = $imageManager->findAll();
+        $assignation['containers'] = $containerManager->findAll([
+            'all' => true
+        ]);
 
 
         return $this->render('AMDockerBundle:Default:index.html.twig', $assignation);

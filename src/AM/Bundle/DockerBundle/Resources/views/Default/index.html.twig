@@ -1,18 +1,37 @@
-Hello !
+{% extends 'default/index.html.twig' %}
 
-{% if error is defined %}
-<p class="alert error">{{ error }}</p>
-{% endif %}
+{% block navigation %}
+<nav class="nav navbar-default">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#main-navigation-collapse">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">LittleShip</a>
+        </div>
+        <div class="collapse navbar-collapse" id="main-navigation-collapse">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="{{ path('am_docker_homepage') }}">{% trans %}Containers{% endtrans %}</a></li>
+                <li class=""><a href="{{ path('am_docker_imagespage') }}">{% trans %}Images{% endtrans %}</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+{% endblock %}
 
+{% block content %}
+<table class="table">
+    {% for container in containers %}
+    <tr class="container">
+        <td class="name">{{ container.data.Names[0] }}</td>
+        <td class="image">{{ container.config.Image }}</td>
+        <td><date class="created">{{ container.data.Created|localizeddate('short', 'short') }}</date></td>
+        <td class="image">{{ container.data.Status }}</td>
+    </tr>
+    {% endfor %}
+</table>
 
-{% for container in containers %}
-<li class="container">
-    <p class="id">{{ container.id }}</p>
-    {% if container.name is defined %}
-    <p class="name">{{ container.name }}</p>
-    {% endif %}
-    <p class="image">{{ container.config.Image }}</p>
-    <date class="created">{{ container.data.Created|localizeddate('medium', 'short') }}</date>
-</li>
-{{ dump(container) }}
-{% endfor %}
+{% endblock %}

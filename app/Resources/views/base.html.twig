@@ -1,13 +1,22 @@
 <!DOCTYPE html>
-<html>
+<!--[if lt IE 7]>      <html itemscope itemtype="http://schema.org/Article" class="no-js lt-ie9 lt-ie8 lt-ie7" lang="{{ app.request.locale }}"> <![endif]-->
+<!--[if IE 7]>         <html itemscope itemtype="http://schema.org/Article" class="no-js lt-ie9 lt-ie8" lang="{{ app.request.locale }}"> <![endif]-->
+<!--[if IE 8]>         <html itemscope itemtype="http://schema.org/Article" class="no-js lt-ie9" lang="{{ app.request.locale }}"> <![endif]-->
+<!--[if IE 9]>         <html itemscope itemtype="http://schema.org/Article" class="no-js ie9" lang="{{ app.request.locale }}"> <![endif]-->
+<!--[if gt IE 9]><!--> <html itemscope itemtype="http://schema.org/Article" class="no-js" lang="{{ app.request.locale }}"> <!--<![endif]-->
     <head>
-        <meta charset="UTF-8" />
+        <meta charset="utf-8">
         <title>{% block title %}Welcome!{% endblock %}</title>
         {% block stylesheets %}{% endblock %}
+        <link rel="stylesheet" href="{{ asset('vendor/bootstrap/dist/css/bootstrap.min.css') }}" type="text/css"/>
+        <link rel="stylesheet" href="{{ asset('vendor/bootstrap/dist/css/bootstrap-theme.min.css') }}" type="text/css"/>
+        <link rel="stylesheet" href="{{ asset('built/app/css/style.css') }}" type="text/css"/>
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
     </head>
     <body>
+        <div class="container">
         {% block body %}{% endblock %}
+        </div>
         {% block javascripts %}{% endblock %}
     </body>
 </html>

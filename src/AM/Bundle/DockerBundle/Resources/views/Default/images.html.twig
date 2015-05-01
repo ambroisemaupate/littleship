@@ -1,10 +1,35 @@
+{% extends 'default/index.html.twig' %}
 
+{% block navigation %}
+<nav class="nav navbar-default">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#main-navigation-collapse">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">LittleShip</a>
+        </div>
+        <div class="collapse navbar-collapse" id="main-navigation-collapse">
+            <ul class="nav navbar-nav">
+                <li class=""><a href="{{ path('am_docker_homepage') }}">{% trans %}Containers{% endtrans %}</a></li>
+                <li class="active"><a href="{{ path('am_docker_imagespage') }}">{% trans %}Images{% endtrans %}</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+{% endblock %}
 
-<ul class="images">
-    {% for image in images %}
-    <li class="image">
-        <p class="repository">{{ image.repository }}</p>
-        <p class="tag">{{ image.tag }}</p>
-    </li>
-    {% endfor %}
-</ul>
+{% block content %}
+    <table class="table">
+        {% for image in images %}
+        <tr class="image">
+            <td class="repository">{{ image.repository }}</td>
+            <td class="tag">{{ image.tag }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
+

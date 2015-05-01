@@ -1,5 +1,26 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    Homepage.
+{% block navigation %}
+<nav class="nav navbar-default">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#main-navigation-collapse">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">LittleShip</a>
+        </div>
+        <div class="collapse navbar-collapse" id="main-navigation-collapse">
+            <ul class="nav navbar-nav">
+                <li class="nav-item"><a href="{{ path('am_docker_homepage') }}">{% trans %}Containers{% endtrans %}</a></li>
+                <li class="nav-item"><a href="{{ path('am_docker_imagespage') }}">{% trans %}Images{% endtrans %}</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+{% block content %}{% endblock %}
 {% endblock %}
