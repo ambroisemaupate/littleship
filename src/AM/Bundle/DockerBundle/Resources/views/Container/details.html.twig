@@ -1,0 +1,105 @@
+{% extends 'default/index.html.twig' %}
+
+{% set running = container.runtimeInformations.State.Running %}
+{% set ports = container.runtimeInformations.NetworkSettings.Ports %}
+{% set image = container.runtimeInformations.Config.Image %}
+
+{% block title %}{% trans %}Container details:{% endtrans %} {{ container.runtimeInformations.Name }}{% endblock %}
+
+{% block content %}
+<nav class="nav ">
+    <div class="container">
+        <div class="navbar-header">
+            <p class="navbar-brand name">{{ container.runtimeInformations.Name }}</p>
+            <p class="navbar-brand image">{{ image }}</p>
+        </div>
+        <div class="navbar-form">
+            <div class="form-group">
+                {% if running %}
+                <a href="{{ path('am_docker_container_stop', {id:container.id}) }}" class="btn btn btn-warning">{% trans %}Stop{% endtrans %}</a>
+                {% else %}
+                <a href="{{ path('am_docker_container_start', {id:container.id}) }}" class="btn btn-default">{% trans %}Start{% endtrans %}</a>
+                <a href="{{ path('am_docker_container_remove', {id:container.id}) }}" class="btn btn btn-danger">{% trans %}Remove{% endtrans %}</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>
+<section class="row container-details">
+    <div class="col-md-12">
+        <div class="panel panel-default env">
+            <div class="panel-heading"><h3 class="panel-title">{% trans %}Environment variables{% endtrans %}</h3></div>
+            <table class="table">
+                {% for envVar in container.runtimeInformations.Config.Env %}
+                {% set envVarArray = envVar|split('=') %}
+                <tr><td class="env-name">{{ envVarArray[0] }}</td><td class="env-var">{{ envVarArray[1] }}</td></tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <div class="panel panel-default volumes">
+            <div class="panel-heading"><h3 class="panel-title">{% trans %}Volumes{% endtrans %}</h3></div>
+            <table class="table">
+                {% for intern, extern in container.runtimeInformations.Volumes %}
+                <tr><td>{{ intern }}</td><td>{{ extern }}</td></tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+    {% if linkedContainers is defined %}
+    <div class="col-md-4">
+        <div class="panel panel-default links">
+            <div class="panel-heading"><h3 class="panel-title">{% trans %}Links{% endtrans %}</h3></div>
+            <table class="table">
+
+                {% for link in linkedContainers %}
+                {% set link = link|split(':') %}
+                <tr class="link"><td>{{ link[0] }}</td><td>{{ link[1] }}</td></tr>
+                {% endfor %}
+
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if volumesFromContainers is defined %}
+    <div class="col-md-4">
+        <div class="panel panel-default volumes">
+            <div class="panel-heading"><h3 class="panel-title">{% trans %}Volumes from{% endtrans %}</h3></div>
+            <table class="table">
+                {% for otherContainer in volumesFromContainers %}
+                <tr><td>{{ otherContainer }}</td></tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if ports|length > 0 %}
+    <div class="col-md-4">
+        <div class="panel panel-default ports">
+            <div class="panel-heading"><h3 class="panel-title">{% trans %}Ports{% endtrans %}</h3></div>
+            <table class="table">
+                {% for port, settings in ports %}
+                <tr>
+                    <td>{{ port }}</td>
+                    {% for setting in settings %}
+                    <td>{{ setting.HostIp }}</td>
+                    <td>{{ setting.HostPort }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="col-md-12">
+    {{ dump(container) }}
+    </div>
+</section>
+
+
+{% endblock %}

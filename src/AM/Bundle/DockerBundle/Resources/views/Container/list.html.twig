@@ -1,26 +1,6 @@
 {% extends 'default/index.html.twig' %}
 
-{% block navigation %}
-<nav class="nav navbar-default">
-    <div class="container">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#main-navigation-collapse">
-              <span class="sr-only">Toggle navigation</span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="#">LittleShip</a>
-        </div>
-        <div class="collapse navbar-collapse" id="main-navigation-collapse">
-            <ul class="nav navbar-nav">
-                <li class="active"><a href="{{ path('am_docker_homepage') }}">{% trans %}Containers{% endtrans %}</a></li>
-                <li class=""><a href="{{ path('am_docker_imagespage') }}">{% trans %}Images{% endtrans %}</a></li>
-            </ul>
-        </div>
-    </div>
-</nav>
-{% endblock %}
+{% block title %}{% trans %}Containers{% endtrans %}{% endblock %}
 
 {% block content %}
 <table class="table table-striped">
@@ -31,13 +11,12 @@
             <th>{% trans %}Creation date{% endtrans %}</th>
             <th>{% trans %}Ports{% endtrans %}</th>
             <th>{% trans %}Status{% endtrans %}</th>
-            <th>{% trans %}Actions{% endtrans %}</th>
         </tr>
     </thead>
     <tbody>
         {% for container in containers %}
         <tr class="">
-            <td class="name">{{ container.data.Names[0] }}</td>
+            <td class="name"><a href="{{ path('am_docker_container_details', {id:container.id}) }}">{{ container.data.Names[0] }}</a></td>
             <td class="image">{{ container.config.Image }}</td>
             <td>{{ container.data.Created|localizeddate('short', 'short') }}</td>
             <td class="ports">
@@ -55,10 +34,6 @@
                 </table>
             </td>
             <td class="status">{{ container.data.Status }}</td>
-            <td class="actions">
-            <a href="{{ path('am_docker_container_start', {id:container.id}) }}" class="btn btn-default btn-xs">{% trans %}Start{% endtrans %}</a>
-            <a href="{{ path('am_docker_container_stop', {id:container.id}) }}" class="btn btn btn-warning btn-xs">{% trans %}Stop{% endtrans %}</a>
-            </td>
         </tr>
         {% endfor %}
     </tbody>

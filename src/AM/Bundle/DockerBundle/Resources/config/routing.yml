@@ -1,12 +1,21 @@
 am_docker_homepage:
     path:     /
     defaults: { _controller: AMDockerBundle:Container:list }
+am_docker_container_list:
+    path:     /containers
+    defaults: { _controller: AMDockerBundle:Container:list }
+am_docker_container_details:
+    path:     /container/{id}
+    defaults: { _controller: AMDockerBundle:Container:details }
 am_docker_container_start:
     path:     /container/start/{id}
     defaults: { _controller: AMDockerBundle:Container:start }
 am_docker_container_stop:
     path:     /container/stop/{id}
     defaults: { _controller: AMDockerBundle:Container:stop }
+am_docker_container_remove:
+    path:     /container/remove/{id}
+    defaults: { _controller: AMDockerBundle:Container:remove }
 am_docker_imagespage:
     path:     /images
     defaults: { _controller: AMDockerBundle:Default:images }

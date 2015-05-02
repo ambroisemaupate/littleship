@@ -47,6 +47,33 @@ class ContainerController extends Controller
         return $this->render('AMDockerBundle:Container:list.html.twig', $assignation);
     }
 
+    public function detailsAction($id)
+    {
+        $docker = $this->get('docker');
+        $manager = $docker->getContainerManager();
+        $container = $manager->find($id);
+
+        if (null !== $container) {
+            $manager->inspect($container);
+            $assignation['container'] = $container;
+            $runtimeInformations = $container->getRuntimeInformations();
+
+            if (count($runtimeInformations['HostConfig']['Links']) > 0) {
+                $assignation['linkedContainers'] = $runtimeInformations['HostConfig']['Links'];
+            }
+            if (count($runtimeInformations['HostConfig']['VolumesFrom']) > 0) {
+                $assignation['volumesFromContainers'] = $runtimeInformations['HostConfig']['VolumesFrom'];
+            }
+
+            return $this->render('AMDockerBundle:Container:details.html.twig', $assignation);
+
+        } else {
+            throw $this->createNotFoundException();
+        }
+    }
+
+
+
     public function startAction($id)
     {
         $docker = $this->get('docker');
@@ -75,6 +102,25 @@ class ContainerController extends Controller
             $infos = new ContainerInfos($container);
             if ($infos->isRunning()) {
                 $manager->stop($container, 2);
+            }
+            return $this->redirect($this->generateUrl('am_docker_homepage'));
+
+        } else {
+            throw $this->createNotFoundException();
+        }
+    }
+
+    public function removeAction($id)
+    {
+        $docker = $this->get('docker');
+        $manager = $docker->getContainerManager();
+        $container = $manager->find($id);
+
+        if (null !== $container) {
+            $infos = new ContainerInfos($container);
+            if ($infos->isRunning()) {
+                $manager->kill($container);
+                $manager->remove($container);
             }
             return $this->redirect($this->generateUrl('am_docker_homepage'));
 
