@@ -20,25 +20,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  *
- * @file DefaultController.php
+ * @file Container.php
  * @author Ambroise Maupate
  */
-namespace AM\Bundle\DockerBundle\Controller;
+namespace AM\Bundle\DockerBundle\Docker;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Docker\Container;
 
-class DefaultController extends Controller
+/**
+ * Docker container wrapper class
+ */
+class ContainerInfos
 {
+    protected $container;
 
-    public function imagesAction()
+    public function __construct(Container $container)
     {
-        $docker = $this->get('docker');
-        $imageManager = $docker->getImageManager();
+        $this->container = $container;
+    }
 
-        $assignation = [];
-        $assignation['images'] = $imageManager->findAll();
+    public function isRunning()
+    {
+        if ($this->container->exists()) {
+            $data = $this->container->getRuntimeInformations();
+            if (isset($data['State']['Running'])) {
+                return $data['State']['Running'];
+            }
+        }
 
-
-        return $this->render('AMDockerBundle:Default:images.html.twig', $assignation);
+        return false;
     }
 }
