@@ -11,3 +11,5 @@
 /web/bundles/
 /web/vendor/
 /node_modules/
+# NFS share ghost files
+._*

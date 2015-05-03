@@ -1,6 +1,8 @@
 littleship
 ==========
 
+![LittleShip](./littleshipREADME.png)
+
 A symfony app to manage your docker containers.
 
 ## Using as a container
