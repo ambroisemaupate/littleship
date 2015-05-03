@@ -25,6 +25,11 @@
  */
 namespace AM\Bundle\DockerBundle\Controller;
 
+use Docker\Container;
+use Docker\Manager\ImageManager;
+use Docker\Manager\ContainerManager;
+use Symfony\Component\HttpFoundation\Request;
+use AM\Bundle\DockerBundle\Form\ContainerType;
 use AM\Bundle\DockerBundle\Docker\ContainerInfos;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
@@ -72,7 +77,49 @@ class ContainerController extends Controller
         }
     }
 
+    public function addAction(Request $request)
+    {
+        $docker = $this->get('docker');
+        $cManager = $docker->getContainerManager();
+        $iManager = $docker->getImageManager();
 
+        $form = $this->createForm(new ContainerType($iManager, $cManager));
+
+        $form->handleRequest($request);
+
+        if ($form->isValid()) {
+            $data = $form->getData();
+            $newCont = new Container([
+                'Image' => $data['image'],
+                'Env' => $data['env'],
+                'ExposedPorts' => $this->getExposedPorts($data['ports']),
+                'HostConfig' => [
+                    'Links' => $data['links'],
+                    'VolumesFrom' => $data['volumes_from'],
+                    'PublishAllPorts' => (boolean) $data['publish_ports']
+                ]
+            ]);
+            $newCont->setName($data['name']);
+
+            $cManager->run($newCont, null, [], true);
+
+            return $this->redirect($this->generateUrl('am_docker_container_list'));
+        }
+
+        $assignation['form'] = $form->createView();
+
+        return $this->render('AMDockerBundle:Container:add.html.twig', $assignation);
+    }
+
+    protected function getExposedPorts($ports)
+    {
+        $expPorts = [];
+        foreach ($ports as $port) {
+            $expPorts[$port] = [];
+        }
+
+        return $expPorts;
+    }
 
     public function startAction($id)
     {
@@ -85,7 +132,7 @@ class ContainerController extends Controller
             if (!$infos->isRunning()) {
                 $manager->start($container);
             }
-            return $this->redirect($this->generateUrl('am_docker_homepage'));
+            return $this->redirect($this->generateUrl('am_docker_container_list'));
 
         } else {
             throw $this->createNotFoundException();
@@ -103,7 +150,7 @@ class ContainerController extends Controller
             if ($infos->isRunning()) {
                 $manager->stop($container, 2);
             }
-            return $this->redirect($this->generateUrl('am_docker_homepage'));
+            return $this->redirect($this->generateUrl('am_docker_container_list'));
 
         } else {
             throw $this->createNotFoundException();
@@ -120,9 +167,9 @@ class ContainerController extends Controller
             $infos = new ContainerInfos($container);
             if ($infos->isRunning()) {
                 $manager->kill($container);
-                $manager->remove($container);
             }
-            return $this->redirect($this->generateUrl('am_docker_homepage'));
+            $manager->remove($container);
+            return $this->redirect($this->generateUrl('am_docker_container_list'));
 
         } else {
             throw $this->createNotFoundException();

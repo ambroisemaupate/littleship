@@ -32,7 +32,10 @@
             <table class="table">
                 {% for envVar in container.runtimeInformations.Config.Env %}
                 {% set envVarArray = envVar|split('=') %}
-                <tr><td class="env-name">{{ envVarArray[0] }}</td><td class="env-var">{{ envVarArray[1] }}</td></tr>
+                <tr>
+                    <td class="env-name">{{ envVarArray[0] }}</td>
+                    {% if envVarArray[1] is defined %}<td class="env-var">{{ envVarArray[1] }}</td>{% endif %}
+                </tr>
                 {% endfor %}
             </table>
         </div>

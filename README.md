@@ -3,6 +3,11 @@ littleship
 
 A symfony app to manage your docker containers.
 
+## Using as a container
+
+* Define a volume on `/var/run/docker.sock`
+* Your PHP-FPM user must be in `docker` group with same GID as your host machine to access socket
+
 ## Nginx config
 
 If your are using docker `maxexcloo/nginx-php` image, add this `nginx-symfony.conf`

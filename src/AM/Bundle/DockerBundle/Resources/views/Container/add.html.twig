@@ -1,0 +1,15 @@
+{% extends 'default/index.html.twig' %}
+
+
+{% block title %}{% trans %}Add container{% endtrans %}{% endblock %}
+
+{% block content %}
+
+{% form_theme form 'bootstrap_3_layout.html.twig' %}
+{{ form(form) }}
+{% endblock %}
+
+
+{% block javascripts %}
+<script src="{{ asset('bundles/amdocker/js/add-container.js') }}"></script>
+{% endblock %}
