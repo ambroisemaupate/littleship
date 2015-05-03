@@ -1,0 +1,13 @@
+{% trans_default_domain 'FOSUserBundle' %}
+
+<div class="page-header">
+    <h1>{% trans %}Create an account on LittleShip{% endtrans %}</h1>
+</div>
+<div class="col-md-4">
+    <form action="{{ path('fos_user_registration_register') }}" {{ form_enctype(form) }} method="POST" class="fos_user_registration_register">
+        {{ form_widget(form) }}
+        <div>
+            <button class="btn btn-primary" type="submit">{{ 'registration.submit'|trans }}</button>
+        </div>
+    </form>
+</div>

@@ -37,6 +37,9 @@ class DefaultController extends Controller
 
     public function imagesAction()
     {
+        if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
+            throw $this->createAccessDeniedException();
+        }
         $docker = $this->get('docker');
         $imageManager = $docker->getImageManager();
 

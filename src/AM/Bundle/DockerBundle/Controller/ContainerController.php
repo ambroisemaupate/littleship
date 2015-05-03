@@ -40,6 +40,9 @@ class ContainerController extends Controller
 {
     public function listAction()
     {
+        if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
+            throw $this->createAccessDeniedException();
+        }
         $docker = $this->get('docker');
         $manager = $docker->getContainerManager();
 
@@ -48,12 +51,14 @@ class ContainerController extends Controller
             'all' => true
         ]);
 
-
         return $this->render('AMDockerBundle:Container:list.html.twig', $assignation);
     }
 
     public function detailsAction($id)
     {
+        if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
+            throw $this->createAccessDeniedException();
+        }
         $docker = $this->get('docker');
         $manager = $docker->getContainerManager();
         $container = $manager->find($id);
@@ -79,6 +84,9 @@ class ContainerController extends Controller
 
     public function addAction(Request $request)
     {
+        if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
+            throw $this->createAccessDeniedException();
+        }
         $docker = $this->get('docker');
         $cManager = $docker->getContainerManager();
         $iManager = $docker->getImageManager();
@@ -123,6 +131,9 @@ class ContainerController extends Controller
 
     public function startAction($id)
     {
+        if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
+            throw $this->createAccessDeniedException();
+        }
         $docker = $this->get('docker');
         $manager = $docker->getContainerManager();
         $container = $manager->find($id);
@@ -141,6 +152,9 @@ class ContainerController extends Controller
 
     public function stopAction($id)
     {
+        if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
+            throw $this->createAccessDeniedException();
+        }
         $docker = $this->get('docker');
         $manager = $docker->getContainerManager();
         $container = $manager->find($id);
@@ -159,6 +173,9 @@ class ContainerController extends Controller
 
     public function removeAction($id)
     {
+        if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
+            throw $this->createAccessDeniedException();
+        }
         $docker = $this->get('docker');
         $manager = $docker->getContainerManager();
         $container = $manager->find($id);
