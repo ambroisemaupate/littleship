@@ -7,24 +7,19 @@
 {% block title %}{% trans %}Container details:{% endtrans %} {{ container.runtimeInformations.Name }}{% endblock %}
 
 {% block content %}
-<nav class="nav ">
-    <div class="container">
-        <div class="navbar-header">
-            <p class="navbar-brand name">{{ container.runtimeInformations.Name }}</p>
-            <p class="navbar-brand image">{{ image }}</p>
-        </div>
-        <div class="navbar-form">
-            <div class="form-group">
-                {% if running %}
-                <a href="{{ path('am_docker_container_stop', {id:container.id}) }}" class="btn btn btn-warning">{% trans %}Stop{% endtrans %}</a>
-                {% else %}
-                <a href="{{ path('am_docker_container_start', {id:container.id}) }}" class="btn btn-default">{% trans %}Start{% endtrans %}</a>
-                <a href="{{ path('am_docker_container_remove', {id:container.id}) }}" class="btn btn btn-danger">{% trans %}Remove{% endtrans %}</a>
-                {% endif %}
-            </div>
+<div class="page-header">
+    <div class="navbar-form navbar-right">
+        <div class="form-group">
+            {% if running %}
+            <a href="{{ path('am_docker_container_stop', {id:container.id}) }}" class="btn btn btn-warning">{% trans %}Stop{% endtrans %}</a>
+            {% else %}
+            <a href="{{ path('am_docker_container_start', {id:container.id}) }}" class="btn btn-default">{% trans %}Start{% endtrans %}</a>
+            <a href="{{ path('am_docker_container_remove', {id:container.id}) }}" class="btn btn btn-danger">{% trans %}Remove{% endtrans %}</a>
+            {% endif %}
         </div>
     </div>
-</nav>
+    <h1>{{ container.runtimeInformations.Name }} <small>{{ image }}</small></h1>
+</div>
 <section class="row container-details">
     <div class="col-md-12">
         <div class="panel panel-default env">
@@ -98,10 +93,6 @@
         </div>
     </div>
     {% endif %}
-
-    <div class="col-md-12">
-    {{ dump(container) }}
-    </div>
 </section>
 
 

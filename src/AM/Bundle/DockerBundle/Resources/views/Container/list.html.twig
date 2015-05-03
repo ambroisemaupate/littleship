@@ -3,6 +3,14 @@
 {% block title %}{% trans %}Containers{% endtrans %}{% endblock %}
 
 {% block content %}
+<div class="page-header">
+    <div class="navbar-form navbar-right">
+        <div class="form-group">
+            <a href="{{ path('am_docker_container_add') }}" class="btn btn-default">{% trans %}Create a container{% endtrans %}</a>
+        </div>
+    </div>
+    <h1>{% trans %}Containers{% endtrans %}</h1>
+</div>
 <table class="table table-striped">
     <thead>
         <tr>
@@ -24,18 +32,16 @@
             <td class="image">{{ container.config.Image }}</td>
             <td>{{ container.data.Created|localizeddate('short', 'short') }}</td>
             <td class="ports">
-                <table class="table">
-                    {% for port in container.data.Ports %}
-                    <tr>
-                        {% if port.PrivatePort is defined %}
-                        <td class="private">{{ port.PrivatePort }}</td>
-                        {% endif %}
-                        {% if port.PublicPort is defined %}
-                        <td class="private">{{ port.PublicPort }}</td>
-                        {% endif %}
-                    </tr>
-                    {% endfor %}
-                </table>
+                {% for port in container.data.Ports %}
+                <p>
+                    {% if port.PrivatePort is defined %}
+                    <span class="private">{{ port.PrivatePort }}</span>
+                    {% endif %}
+                    {% if port.PublicPort is defined %}
+                    <span class="public">{{ port.PublicPort }}</span>
+                    {% endif %}
+                </p>
+                {% endfor %}
             </td>
             <td class="status">{{ container.data.Status }}</td>
         </tr>
@@ -43,5 +49,4 @@
     </tbody>
 </table>
 
-<a href="{{ path('am_docker_container_add') }}" class="btn btn-default">{% trans %}Create a container{% endtrans %}</a>
 {% endblock %}

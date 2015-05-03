@@ -1799,3 +1799,20 @@
 .fa-medium:before {
   content: "\f23a";
 }
+.navbar-brand img {
+  display: inline-block;
+  margin-top: -15px;
+  margin-left: -15px;
+  margin-right: 15px;
+  height: 50px;
+  vertical-align: top;
+}
+.navbar-brand .navbar-brand-title {
+  display: inline-block;
+  vertical-align: top;
+}
+.ports .public:before {
+  content: '\2192';
+  display: inline-block;
+  margin-right: 5px;
+}
