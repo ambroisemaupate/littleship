@@ -29,6 +29,11 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 class DefaultController extends Controller
 {
+    public function indexAction()
+    {
+        $assignation = [];
+        return $this->render('AMDockerBundle:Default:index.html.twig', $assignation);
+    }
 
     public function imagesAction()
     {

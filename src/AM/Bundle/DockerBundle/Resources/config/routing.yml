@@ -1,6 +1,6 @@
 am_docker_homepage:
     path:     /
-    defaults: { _controller: AMDockerBundle:Container:list }
+    defaults: { _controller: AMDockerBundle:Default:index }
 am_docker_container_list:
     path:     /containers
     defaults: { _controller: AMDockerBundle:Container:list }

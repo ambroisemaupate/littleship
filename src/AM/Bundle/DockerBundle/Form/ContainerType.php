@@ -82,7 +82,6 @@ class ContainerType extends AbstractType
             'label' => 'Publish all exposed ports',
             'required'  => false,
         ])
-        //PublishAllPorts
         ->add('volumes_from', new AvailableContainersType($this->containerManager), [
             'label' => 'Use volumes from:',
             'empty_value' => 'None',
