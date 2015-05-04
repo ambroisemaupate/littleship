@@ -1,6 +1,6 @@
 {
     "name": "nestorwww/littleship",
-    "license": "proprietary",
+    "license": "MIT",
     "type": "project",
     "autoload": {
         "psr-0": {
