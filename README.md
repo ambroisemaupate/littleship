@@ -5,6 +5,26 @@ littleship
 
 A symfony app to manage your docker containers.
 
+## Database
+
+By default, LittleShip uses a SQLite database which will be stored in `app/data`
+folder.
+
+```shell
+mkdir -p /data/http/app/data;
+```
+
+## Deploy assets
+
+To install LittleShip you should have *Grunt* and *Bower* installed on your
+server. Once you’ve setup symfony dependencies with composer, run:
+
+```shell
+npm install;
+bower install -s;
+app/console assets:install --symlink && grunt deploy;
+```
+
 ## Using as a container
 
 * Define a volume on `/var/run/docker.sock`
