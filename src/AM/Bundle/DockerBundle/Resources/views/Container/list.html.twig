@@ -15,23 +15,39 @@
     <thead>
         <tr>
             <th>{% trans %}Name{% endtrans %}</th>
-            <th>{% trans %}Image{% endtrans %}</th>
-            <th>{% trans %}Creation date{% endtrans %}</th>
-            <th>{% trans %}Ports{% endtrans %}</th>
-            <th>{% trans %}Status{% endtrans %}</th>
+            <th class="hidden-xs">{% trans %}Image{% endtrans %}</th>
+            <th class="hidden-xs">{% trans %}Creation date{% endtrans %}</th>
+            <th class="hidden-xs">{% trans %}Ports{% endtrans %}</th>
+            <th class="hidden-xs">{% trans %}Status{% endtrans %}</th>
         </tr>
     </thead>
     <tbody>
         {% for container in containers %}
-        <tr class="">
+        {% if 'Up' in container.data.Status %}
+        {% set status = 'running' %}
+        {% elseif 'Exited' in container.data.Status %}
+        {% set status = 'exited' %}
+        {% elseif 'Dead' in container.data.Status %}
+        {% set status = 'dead' %}
+        {% endif %}
+
+        <tr class="{{ status }}">
             <td class="name">
+                {% if 'Up' in container.data.Status %}
+                <i class="glyphicon glyphicon-ok-circle"></i>
+                {% elseif 'Exited' in container.data.Status %}
+                <i class="glyphicon glyphicon-ban-circle"></i>
+                {% elseif 'Dead' in container.data.Status %}
+                <i class="glyphicon glyphicon-exclamation-sign"></i>
+                {% endif %}
+
                 {% if container.data.Names[0] is defined %}
                 <a href="{{ path('am_docker_container_details', {id:container.id}) }}">{{ container.data.Names[0] }}</a>
                 {% endif %}
             </td>
-            <td class="image">{{ container.config.Image }}</td>
-            <td>{{ container.data.Created|localizeddate('short', 'short') }}</td>
-            <td class="ports">
+            <td class="image hidden-xs">{{ container.config.Image }}</td>
+            <td class="hidden-xs">{{ container.data.Created|localizeddate('short', 'short') }}</td>
+            <td class="ports hidden-xs">
                 {% for port in container.data.Ports %}
                 <p>
                     {% if port.PrivatePort is defined %}
@@ -43,7 +59,9 @@
                 </p>
                 {% endfor %}
             </td>
-            <td class="status">{{ container.data.Status }}</td>
+            <td class="status hidden-xs">
+            {{ container.data.Status }}
+            </td>
         </tr>
         {% endfor %}
     </tbody>

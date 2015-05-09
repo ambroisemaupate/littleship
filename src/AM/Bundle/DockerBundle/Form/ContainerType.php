@@ -64,6 +64,7 @@ class ContainerType extends AbstractType
             'attr' => ['class' => 'add-delete-form-type'],
             'options'  => [
                 'required'  => false,
+                'label' => false,
                 'attr'      => ['class' => 'environment-var']
             ]
         ])
@@ -75,6 +76,7 @@ class ContainerType extends AbstractType
             'attr' => ['class' => 'add-delete-form-type'],
             'options'  => [
                 'required'  => false,
+                'label' => false,
                 'attr'      => ['class' => 'port']
             ]
         ])
@@ -93,6 +95,17 @@ class ContainerType extends AbstractType
             'empty_value' => 'None',
             'multiple' => true,
             'required'  => false,
+        ])
+        ->add('restart_policy', 'choice', [
+            'label' => 'Restart policy:',
+            'empty_value' => '-- Choose a restart policy --',
+            'choices' => [
+                'no' => 'Do not automatically restart the container',
+                'on-failure' => 'Restart only if the container exits with a non-zero exit status',
+                'always' => 'Always restart the container regardless of the exit status'
+            ],
+            'multiple' => false,
+            'required'  => true,
         ])
         ->add('submit', 'submit', [
             'label' => 'Create and run',

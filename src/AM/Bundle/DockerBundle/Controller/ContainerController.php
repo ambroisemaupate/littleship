@@ -74,6 +74,31 @@ class ContainerController extends Controller
             if (count($runtimeInformations['HostConfig']['VolumesFrom']) > 0) {
                 $assignation['volumesFromContainers'] = $runtimeInformations['HostConfig']['VolumesFrom'];
             }
+            if (isset($runtimeInformations['HostConfig']['RestartPolicy'])) {
+                $assignation['restartPolicy'] = $runtimeInformations['HostConfig']['RestartPolicy'];
+            }
+
+            if (isset($runtimeInformations['State']['FinishedAt'])) {
+                $date = explode('.', $runtimeInformations['State']['FinishedAt']);
+                $assignation['FinishedAt'] = new \DateTime($date[0] . 'Z');
+            }
+            if (isset($runtimeInformations['State']['StartedAt'])) {
+                $date = explode('.', $runtimeInformations['State']['StartedAt']);
+                $assignation['StartedAt'] = new \DateTime($date[0] . 'Z');
+
+                $now = new \DateTime();
+                $assignation['RunningAge'] = $now->diff($assignation['StartedAt'], true);
+            }
+            if (isset($runtimeInformations['Created'])) {
+                $date = explode('.', $runtimeInformations['Created']);
+                $assignation['Created'] = new \DateTime($date[0] . 'Z');
+
+                $now = new \DateTime();
+                $assignation['Age'] = $now->diff($assignation['Created'], true);
+            }
+
+
+            $assignation['logs'] =  $manager->logs($container, false, true, true, false, 100);
 
             return $this->render('AMDockerBundle:Container:details.html.twig', $assignation);
 
@@ -98,17 +123,20 @@ class ContainerController extends Controller
         if ($form->isValid()) {
             $data = $form->getData();
             $newCont = new Container([
-                'Image' => $data['image'],
-                'Env' => $data['env'],
-                'ExposedPorts' => $this->getExposedPorts($data['ports']),
                 'HostConfig' => [
                     'Links' => $data['links'],
                     'VolumesFrom' => $data['volumes_from'],
-                    'PublishAllPorts' => (boolean) $data['publish_ports']
+                    'PublishAllPorts' => (boolean) $data['publish_ports'],
+                    'RestartPolicy' => [
+                        'Name' => $data['restart_policy'],
+                        'MaximumRetryCount' => 0
+                    ]
                 ]
             ]);
+            $newCont->setImage($data['image']);
+            $newCont->setExposedPorts($this->getExposedPorts($data['ports']));
             $newCont->setName($data['name']);
-
+            $newCont->setEnv($data['env']);
             $cManager->run($newCont, null, [], true);
 
             return $this->redirect($this->generateUrl('am_docker_container_list'));
@@ -143,7 +171,9 @@ class ContainerController extends Controller
             if (!$infos->isRunning()) {
                 $manager->start($container);
             }
-            return $this->redirect($this->generateUrl('am_docker_container_list'));
+            return $this->redirect($this->generateUrl('am_docker_container_details', [
+                'id' => $id
+            ]));
 
         } else {
             throw $this->createNotFoundException();
@@ -164,7 +194,9 @@ class ContainerController extends Controller
             if ($infos->isRunning()) {
                 $manager->stop($container, 2);
             }
-            return $this->redirect($this->generateUrl('am_docker_container_list'));
+            return $this->redirect($this->generateUrl('am_docker_container_details', [
+                'id' => $id
+            ]));
 
         } else {
             throw $this->createNotFoundException();

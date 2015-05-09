@@ -18,10 +18,52 @@
             {% endif %}
         </div>
     </div>
-    <h1>{{ container.runtimeInformations.Name }} <small>{{ image }}</small></h1>
+    <h1 class="{% if running %}running{% else %}exited{% endif %}">
+        {% if running %}
+        <i class="glyphicon glyphicon-ok-circle"></i>
+        {% else %}
+        <i class="glyphicon glyphicon-ban-circle"></i>
+        {% endif %}
+        <span class="container-name">{{ container.runtimeInformations.Name }}</span> <small>{{ image }}</small>
+    </h1>
 </div>
 <section class="row container-details">
     <div class="col-md-12">
+        <div class="panel panel-default state">
+            <div class="panel-heading"><h3 class="panel-title">{% trans %}State{% endtrans %}</h3></div>
+            <table class="table">
+                <tr>
+                    <td>{% trans %}CreatedAt{% endtrans %}</td>
+                    <td>{{ Created|localizeddate('full', 'medium') }} — {{ Age.format('%a day(s), %h hour(s), %i minute(s)'|trans) }}</td>
+                </tr>
+                {% if container.runtimeInformations.State.Running %}
+                <tr>
+                    <td>{% trans %}Running{% endtrans %}</td>
+                    <td><i class="glyphicon glyphicon-ok"></i> {{ RunningAge.format('%a day(s), %h hour(s), %i minute(s)'|trans) }}</td>
+                </tr>
+                <tr>
+                    <td>{% trans %}StartedAt{% endtrans %}</td>
+                    <td>{{ StartedAt|localizeddate('full', 'medium') }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td>{% trans %}Running{% endtrans %}</td>
+                    <td><i class="glyphicon glyphicon-remove"></i></td>
+                </tr>
+                <tr>
+                    <td>{% trans %}FinishedAt{% endtrans %}</td>
+                    <td>{{ FinishedAt|localizeddate('full', 'medium') }}</td>
+                </tr>
+                {% endif %}
+
+                {% if container.runtimeInformations.State.Dead %}
+                <tr>
+                    <td>{% trans %}Dead{% endtrans %}</td>
+                    <td><i class="glyphicon glyphicon-ok"></i></td>
+                </tr>
+                {% endif %}
+            </table>
+        </div>
         <div class="panel panel-default env">
             <div class="panel-heading"><h3 class="panel-title">{% trans %}Environment variables{% endtrans %}</h3></div>
             <table class="table">
@@ -90,6 +132,34 @@
                 </tr>
                 {% endfor %}
             </table>
+        </div>
+    </div>
+    {% endif %}
+    {% if restartPolicy.Name %}
+    <div class="col-md-4">
+        <div class="panel panel-default restart-policy">
+            <div class="panel-heading"><h3 class="panel-title">{% trans %}Restart policy{% endtrans %}</h3></div>
+            <table class="table">
+                <tr>
+                    <td colspan="2"><strong>{{ restartPolicy.Name }}</strong></td>
+                </tr>
+                <tr>
+                    <td>{% trans %}MaximumRetryCount{% endtrans %}</td>
+                    <td>{{ restartPolicy.MaximumRetryCount }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+    {% if logs|length > 0 %}
+    <div class="col-md-12">
+        <div class="panel panel-default logs">
+            <div class="panel-heading"><h3 class="panel-title">{% trans %}Logs{% endtrans %}</h3></div>
+            <div class="panel-body code">
+                {% for log in logs %}
+                {{ log.output|nl2br }}
+                {% endfor %}
+            </div>
         </div>
     </div>
     {% endif %}

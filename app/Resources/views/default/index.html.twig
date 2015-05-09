@@ -1,5 +1,7 @@
 {% extends 'base.html.twig' %}
 
+{% set cRoute = app.request.attributes.get('_route') %}
+
 {% block body %}
 {% block navigation %}
 <nav class="nav navbar-default">
@@ -16,8 +18,12 @@
         <div class="collapse navbar-collapse" id="main-navigation-collapse">
             <ul class="nav navbar-nav">
                 {% if is_granted("ROLE_ADMIN") %}
-                <li class="nav-item"><a href="{{ path('am_docker_container_list') }}">{% trans %}Containers{% endtrans %}</a></li>
-                <li class="nav-item"><a href="{{ path('am_docker_imagespage') }}">{% trans %}Images{% endtrans %}</a></li>
+                <li class="nav-item {% if cRoute == 'am_docker_container_list' %}active{% endif %}">
+                <a href="{{ path('am_docker_container_list') }}">{% trans %}Containers{% endtrans %}</a>
+                </li>
+                <li class="nav-item {% if cRoute == 'am_docker_imagespage' %}active{% endif %}">
+                <a href="{{ path('am_docker_imagespage') }}">{% trans %}Images{% endtrans %}</a>
+                </li>
                 {% endif %}
             </ul>
             <div class="navbar-right">
@@ -26,12 +32,12 @@
                         {{ 'layout.logged_in_as'|trans({'%username%': app.user.username}, 'FOSUserBundle') }}
                     </div>
                     <ul class="nav navbar-nav">
-                        <li class="nav-item">
+                        <li class="nav-item {% if cRoute == 'fos_user_profile_edit' %}active{% endif %}">
                             <a href="{{ path('fos_user_profile_edit') }}">
                                 {{ 'Edit profile'|trans }}
                             </a>
                         </li>
-                        <li class="nav-item">
+                        <li class="nav-item {% if cRoute == 'fos_user_security_logout' %}active{% endif %}">
                              <a href="{{ path('fos_user_security_logout') }}">
                                 {{ 'layout.logout'|trans({}, 'FOSUserBundle') }}
                             </a>
@@ -39,10 +45,10 @@
                     </ul>
                 {% else %}
                     <ul class="nav navbar-nav">
-                        <li class="nav-item">
+                        <li class="nav-item {% if cRoute == 'fos_user_security_login' %}active{% endif %}">
                         <a href="{{ path('fos_user_security_login') }}">{{ 'layout.login'|trans({}, 'FOSUserBundle') }}</a>
                         </li>
-                        <li class="nav-item">
+                        <li class="nav-item {% if cRoute == 'fos_user_registration_register' %}active{% endif %}">
                         <a href="{{ path('fos_user_registration_register') }}">{{ 'layout.register'|trans({}, 'FOSUserBundle') }}</a>
                         </li>
                     </ul>

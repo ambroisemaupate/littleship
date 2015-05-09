@@ -1811,8 +1811,38 @@
   display: inline-block;
   vertical-align: top;
 }
+.panel-body.code {
+  background-color: #333;
+  font-family: monospace;
+  color: #EFEFEF;
+  font-size: 11px;
+}
+.page-header h1.running .glyphicon {
+  color: green;
+}
+.page-header h1.exited .glyphicon {
+  color: orange;
+}
+.page-header h1 .glyphicon {
+  font-size: 25px;
+}
 .ports .public:before {
   content: '\2192';
   display: inline-block;
   margin-right: 5px;
+}
+.add-delete-form-type li {
+  list-style: none;
+}
+.running .glyphicon {
+  color: green;
+}
+.exited .glyphicon {
+  color: orange;
+}
+.dead .glyphicon {
+  color: brown;
+}
+.name .glyphicon {
+  margin-right: 10px;
 }

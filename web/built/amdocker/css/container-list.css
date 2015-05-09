@@ -3,3 +3,18 @@
   display: inline-block;
   margin-right: 5px;
 }
+.add-delete-form-type li {
+  list-style: none;
+}
+.running .glyphicon {
+  color: green;
+}
+.exited .glyphicon {
+  color: orange;
+}
+.dead .glyphicon {
+  color: brown;
+}
+.name .glyphicon {
+  margin-right: 10px;
+}
