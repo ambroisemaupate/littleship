@@ -80,18 +80,30 @@ class ContainerController extends Controller
 
             if (isset($runtimeInformations['State']['FinishedAt'])) {
                 $date = explode('.', $runtimeInformations['State']['FinishedAt']);
-                $assignation['FinishedAt'] = new \DateTime($date[0] . 'Z');
+                if (count($date) > 1) {
+                    $assignation['FinishedAt'] = new \DateTime($date[0] . 'Z');
+                } else {
+                    $assignation['FinishedAt'] = new \DateTime($runtimeInformations['State']['FinishedAt']);
+                }
             }
             if (isset($runtimeInformations['State']['StartedAt'])) {
                 $date = explode('.', $runtimeInformations['State']['StartedAt']);
-                $assignation['StartedAt'] = new \DateTime($date[0] . 'Z');
+                if (count($date) > 1) {
+                    $assignation['StartedAt'] = new \DateTime($date[0] . 'Z');
+                } else {
+                    $assignation['StartedAt'] = new \DateTime($runtimeInformations['State']['StartedAt']);
+                }
 
                 $now = new \DateTime();
                 $assignation['RunningAge'] = $now->diff($assignation['StartedAt'], true);
             }
             if (isset($runtimeInformations['Created'])) {
                 $date = explode('.', $runtimeInformations['Created']);
-                $assignation['Created'] = new \DateTime($date[0] . 'Z');
+                if (count($date) > 1) {
+                    $assignation['Created'] = new \DateTime($date[0] . 'Z');
+                } else {
+                    $assignation['Created'] = new \DateTime($runtimeInformations['Created']);
+                }
 
                 $now = new \DateTime();
                 $assignation['Age'] = $now->diff($assignation['Created'], true);
