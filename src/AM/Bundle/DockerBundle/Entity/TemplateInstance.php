@@ -24,6 +24,8 @@
  * @author Ambroise Maupate
  */
 namespace AM\Bundle\DockerBundle\Entity;
+
+use AM\Bundle\UserBundle\Entity\User;
 use AM\Bundle\DockerBundle\Entity\Template;
 use Doctrine\ORM\Mapping as ORM;
 
