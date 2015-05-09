@@ -1,12 +1,20 @@
 {% extends 'default/index.html.twig' %}
 
+{% set cRoute = app.request.attributes.get('_route') %}
+
 {% block title %}{% trans %}Containers{% endtrans %}{% endblock %}
 
 {% block content %}
 <div class="page-header">
     <div class="navbar-form navbar-right">
         <div class="form-group">
-            <a href="{{ path('am_docker_container_add') }}" class="btn btn-default">{% trans %}Create a container{% endtrans %}</a>
+            {% if cRoute == 'am_docker_container_list' %}
+            <a href="{{ path('am_docker_container_listall') }}" class="btn btn-default"><i class="glyphicon glyphicon-eye-open"></i> {% trans %}List all{% endtrans %}</a>
+            {% endif %}
+            {% if cRoute == 'am_docker_container_listall' %}
+            <a href="{{ path('am_docker_container_list') }}" class="btn btn-default"><i class="glyphicon glyphicon-eye-close"></i> {% trans %}List running{% endtrans %}</a>
+            {% endif %}
+            <a href="{{ path('am_docker_container_add') }}" class="btn btn-primary"><i class="glyphicon glyphicon-plus"></i> {% trans %}Create a container{% endtrans %}</a>
         </div>
     </div>
     <h1>{% trans %}Containers{% endtrans %}</h1>

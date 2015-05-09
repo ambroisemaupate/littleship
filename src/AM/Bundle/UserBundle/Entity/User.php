@@ -25,15 +25,65 @@ class User extends BaseUser
      */
     protected $templateInstances = null;
 
-    public function getTemplateInstances()
-    {
-        return $this->templateInstances;
-    }
+    /**
+     * @ORM\Column(type="integer", name="instance_max_count", unique=false, nullable=true)
+     */
+    protected $instanceMaxCount = 0;
+
+
 
     public function __construct()
     {
         parent::__construct();
         // your own logic
         $this->templateInstances = new ArrayCollection();
+    }
+
+    /**
+     * Gets the value of instanceMaxCount.
+     *
+     * @return mixed
+     */
+    public function getInstanceMaxCount()
+    {
+        return $this->instanceMaxCount;
+    }
+
+    /**
+     * Sets the value of instanceMaxCount.
+     *
+     * @param mixed $instanceMaxCount the instance max count
+     *
+     * @return self
+     */
+    protected function setInstanceMaxCount($instanceMaxCount)
+    {
+        $this->instanceMaxCount = (int) $instanceMaxCount;
+
+        return $this;
+    }
+
+    /**
+     * Gets the value of templateInstances.
+     *
+     * @return mixed
+     */
+    public function getTemplateInstances()
+    {
+        return $this->templateInstances;
+    }
+
+    /**
+     * Sets the value of templateInstances.
+     *
+     * @param mixed $templateInstances the template instances
+     *
+     * @return self
+     */
+    protected function setTemplateInstances($templateInstances)
+    {
+        $this->templateInstances = $templateInstances;
+
+        return $this;
     }
 }

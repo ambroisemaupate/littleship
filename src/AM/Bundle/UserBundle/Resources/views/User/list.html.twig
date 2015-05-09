@@ -1,0 +1,37 @@
+{% extends 'default/index.html.twig' %}
+
+{% set cRoute = app.request.attributes.get('_route') %}
+
+{% block title %}{% trans %}Users{% endtrans %}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="navbar-form navbar-right">
+        <div class="form-group">
+
+        </div>
+    </div>
+    <h1>{% trans %}Users{% endtrans %}</h1>
+</div>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th class="name">{% trans %}Name{% endtrans %}</th>
+            <th class="email">{% trans %}Email{% endtrans %}</th>
+            <th class="roles">{% trans %}Roles{% endtrans %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td class="name">{{ user.username }}</td>
+            <td class="email">{{ user.email }}</td>
+            <td class="roles">
+                {{ user.roles|join(', ') }}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

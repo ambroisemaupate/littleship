@@ -47,6 +47,19 @@ class ContainerController extends Controller
         $manager = $docker->getContainerManager();
 
         $assignation = [];
+        $assignation['containers'] = $manager->findAll();
+
+        return $this->render('AMDockerBundle:Container:list.html.twig', $assignation);
+    }
+    public function listAllAction()
+    {
+        if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
+            throw $this->createAccessDeniedException();
+        }
+        $docker = $this->get('docker');
+        $manager = $docker->getContainerManager();
+
+        $assignation = [];
         $assignation['containers'] = $manager->findAll([
             'all' => true
         ]);

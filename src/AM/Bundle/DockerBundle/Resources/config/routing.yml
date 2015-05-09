@@ -4,6 +4,9 @@ am_docker_homepage:
 am_docker_container_list:
     path:     /containers
     defaults: { _controller: AMDockerBundle:Container:list }
+am_docker_container_listall:
+    path:     /containers/all
+    defaults: { _controller: AMDockerBundle:Container:listAll }
 am_docker_container_add:
     path:     /containers/create
     defaults: { _controller: AMDockerBundle:Container:add }
