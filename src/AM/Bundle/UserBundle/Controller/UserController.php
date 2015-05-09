@@ -25,12 +25,18 @@
  */
 namespace AM\Bundle\UserBundle\Controller;
 
+use Symfony\Component\HttpFoundation\Request;
+use AM\Bundle\UserBundle\Form\UserType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 class UserController extends Controller
 {
     public function listAction()
     {
+        if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
+            throw $this->createAccessDeniedException();
+        }
+
         $assignation = [];
         $users = $this->get('doctrine')
                         ->getEntityManager()
@@ -40,5 +46,32 @@ class UserController extends Controller
         $assignation['users'] = $users;
 
         return $this->render('AMUserBundle:User:list.html.twig', $assignation);
+    }
+
+    public function editAction(Request $request, $id)
+    {
+        if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $assignation = [];
+        $user = $this->get('doctrine')
+                        ->getEntityManager()
+                        ->find('AM\Bundle\UserBundle\Entity\User', $id);
+
+        $form = $this->createForm(new UserType(), $user);
+        $form->handleRequest($request);
+        if ($form->isValid()) {
+
+            $this->get('doctrine')
+                        ->getEntityManager()
+                        ->flush();
+            return $this->redirect($this->generateUrl('am_user_edit', ['id'=>$id]));
+        }
+
+        $assignation['user'] = $user;
+        $assignation['form'] = $form->createView();
+
+        return $this->render('AMUserBundle:User:edit.html.twig', $assignation);
     }
 }

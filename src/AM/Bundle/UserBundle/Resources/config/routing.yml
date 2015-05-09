@@ -1,3 +1,8 @@
 am_user_list:
     path:     /users
     defaults: { _controller: AMUserBundle:User:list }
+am_user_edit:
+    path:     /user/{id}
+    defaults: { _controller: AMUserBundle:User:edit }
+    requirements:
+        id: "[0-9]+"

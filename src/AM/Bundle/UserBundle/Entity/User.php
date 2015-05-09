@@ -31,7 +31,6 @@ class User extends BaseUser
     protected $instanceMaxCount = 0;
 
 
-
     public function __construct()
     {
         parent::__construct();
@@ -56,7 +55,7 @@ class User extends BaseUser
      *
      * @return self
      */
-    protected function setInstanceMaxCount($instanceMaxCount)
+    public function setInstanceMaxCount($instanceMaxCount)
     {
         $this->instanceMaxCount = (int) $instanceMaxCount;
 
@@ -80,7 +79,7 @@ class User extends BaseUser
      *
      * @return self
      */
-    protected function setTemplateInstances($templateInstances)
+    public function setTemplateInstances($templateInstances)
     {
         $this->templateInstances = $templateInstances;
 

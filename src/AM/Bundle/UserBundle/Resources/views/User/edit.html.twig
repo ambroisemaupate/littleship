@@ -1,0 +1,35 @@
+{% extends 'default/index.html.twig' %}
+
+{% set cRoute = app.request.attributes.get('_route') %}
+
+{% block title %}{% trans %}User{% endtrans %}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="navbar-form navbar-right">
+        <div class="form-group">
+
+        </div>
+    </div>
+    <h1>{{ user.username }}</h1>
+</div>
+<div class="instances col-md-4">
+    <h2 class="instances-title">{% trans %}Instances{% endtrans %}</h2>
+    <ul>
+        {% for instance in user.templateInstances %}
+        <li>{{ instance.name }}</li>
+        {% else %}
+        <li class="no-instances">{% trans %}No instances linked{% endtrans %}</li>
+        {% endfor %}
+    </ul>
+</div>
+<div class="col-md-8 form">
+    <h2 class="edit-infos">{% trans %}User informations{% endtrans %}</h2>
+    {{ form(form) }}
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+<script src="{{ asset('bundles/amdocker/js/add-container.js') }}"></script>
+{% endblock %}

@@ -18,7 +18,9 @@
         <tr>
             <th class="name">{% trans %}Name{% endtrans %}</th>
             <th class="email">{% trans %}Email{% endtrans %}</th>
+            <th class="last-login">{% trans %}Last login{% endtrans %}</th>
             <th class="roles">{% trans %}Roles{% endtrans %}</th>
+            <th class="actions"></th>
         </tr>
     </thead>
     <tbody>
@@ -26,8 +28,12 @@
         <tr>
             <td class="name">{{ user.username }}</td>
             <td class="email">{{ user.email }}</td>
+            <td class="last-login">{{ user.lastLogin|localizeddate('medium', 'short') }}</td>
             <td class="roles">
                 {{ user.roles|join(', ') }}
+            </td>
+            <td class="actions">
+                <a href="{{ path('am_user_edit', {id: user.id}) }}" class="edit btn btn-xs btn-default">{% trans %}Edit user{% endtrans %}</a>
             </td>
         </tr>
         {% endfor %}

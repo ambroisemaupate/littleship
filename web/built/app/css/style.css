@@ -1811,6 +1811,19 @@
   display: inline-block;
   vertical-align: top;
 }
+.add-delete-form-type .form-group {
+  display: table-row;
+}
+.add-delete-form-type .form-group input,
+.add-delete-form-type .form-group .remove-item {
+  display: table-cell;
+}
+.add-delete-form-type .form-group .remove-item {
+  margin-left: 10px;
+}
+.add-delete-form-type + .add-type-button {
+  margin-top: 10px;
+}
 .panel-body.code {
   background-color: #333;
   font-family: monospace;
