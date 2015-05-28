@@ -22,6 +22,16 @@ am_docker_container_stop:
 am_docker_container_remove:
     path:     /container/remove/{id}
     defaults: { _controller: AMDockerBundle:Container:remove }
-am_docker_imagespage:
+
+
+am_docker_images:
     path:     /images
-    defaults: { _controller: AMDockerBundle:Default:images }
+    defaults: { _controller: AMDockerBundle:Image:images }
+am_docker_images_search:
+    path:     /images/search
+    defaults: { _controller: AMDockerBundle:Image:search}
+am_docker_image_pull:
+    path:     /images/pull/{name}
+    defaults: { _controller: AMDockerBundle:Image:pull}
+    requirements:
+        name: "[a-zA-Z0-9_\-\%]+"

@@ -26,6 +26,7 @@
 namespace AM\Bundle\DockerBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use GuzzleHttp\Exception\RequestException;
 
 class DefaultController extends Controller
 {
@@ -33,20 +34,5 @@ class DefaultController extends Controller
     {
         $assignation = [];
         return $this->render('AMDockerBundle:Default:index.html.twig', $assignation);
-    }
-
-    public function imagesAction()
-    {
-        if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
-            throw $this->createAccessDeniedException();
-        }
-        $docker = $this->get('docker');
-        $imageManager = $docker->getImageManager();
-
-        $assignation = [];
-        $assignation['images'] = $imageManager->findAll();
-
-
-        return $this->render('AMDockerBundle:Default:images.html.twig', $assignation);
     }
 }

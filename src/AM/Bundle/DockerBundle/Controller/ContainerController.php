@@ -32,6 +32,7 @@ use Symfony\Component\HttpFoundation\Request;
 use AM\Bundle\DockerBundle\Form\ContainerType;
 use AM\Bundle\DockerBundle\Docker\ContainerInfos;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use GuzzleHttp\Exception\RequestException;
 
 /**
  * Description.
@@ -43,11 +44,15 @@ class ContainerController extends Controller
         if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
             throw $this->createAccessDeniedException();
         }
-        $docker = $this->get('docker');
-        $manager = $docker->getContainerManager();
 
         $assignation = [];
-        $assignation['containers'] = $manager->findAll();
+        try {
+            $docker = $this->get('docker');
+            $manager = $docker->getContainerManager();
+            $assignation['containers'] = $manager->findAll();
+        } catch (RequestException $e) {
+            $assignation['error'] = $e->getMessage();
+        }
 
         return $this->render('AMDockerBundle:Container:list.html.twig', $assignation);
     }
@@ -56,13 +61,17 @@ class ContainerController extends Controller
         if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
             throw $this->createAccessDeniedException();
         }
-        $docker = $this->get('docker');
-        $manager = $docker->getContainerManager();
-
         $assignation = [];
-        $assignation['containers'] = $manager->findAll([
-            'all' => true
-        ]);
+
+        try {
+            $docker = $this->get('docker');
+            $manager = $docker->getContainerManager();
+            $assignation['containers'] = $manager->findAll([
+                'all' => true
+            ]);
+        } catch (RequestException $e) {
+            $assignation['error'] = $e->getMessage();
+        }
 
         return $this->render('AMDockerBundle:Container:list.html.twig', $assignation);
     }
@@ -137,37 +146,42 @@ class ContainerController extends Controller
         if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
             throw $this->createAccessDeniedException();
         }
-        $docker = $this->get('docker');
-        $cManager = $docker->getContainerManager();
-        $iManager = $docker->getImageManager();
 
-        $form = $this->createForm(new ContainerType($iManager, $cManager));
+        try {
+            $docker = $this->get('docker');
+            $cManager = $docker->getContainerManager();
+            $iManager = $docker->getImageManager();
 
-        $form->handleRequest($request);
+            $form = $this->createForm(new ContainerType($iManager, $cManager));
 
-        if ($form->isValid()) {
-            $data = $form->getData();
-            $newCont = new Container([
-                'HostConfig' => [
-                    'Links' => $data['links'],
-                    'VolumesFrom' => $data['volumes_from'],
-                    'PublishAllPorts' => (boolean) $data['publish_ports'],
-                    'RestartPolicy' => [
-                        'Name' => $data['restart_policy'],
-                        'MaximumRetryCount' => 0
+            $form->handleRequest($request);
+
+            if ($form->isValid()) {
+                $data = $form->getData();
+                $newCont = new Container([
+                    'HostConfig' => [
+                        'Links' => $data['links'],
+                        'VolumesFrom' => $data['volumes_from'],
+                        'PublishAllPorts' => (boolean) $data['publish_ports'],
+                        'RestartPolicy' => [
+                            'Name' => $data['restart_policy'],
+                            'MaximumRetryCount' => 0
+                        ]
                     ]
-                ]
-            ]);
-            $newCont->setImage($data['image']);
-            $newCont->setExposedPorts($this->getExposedPorts($data['ports']));
-            $newCont->setName($data['name']);
-            $newCont->setEnv($data['env']);
-            $cManager->run($newCont, null, [], true);
+                ]);
+                $newCont->setImage($data['image']);
+                $newCont->setExposedPorts($this->getExposedPorts($data['ports']));
+                $newCont->setName($data['name']);
+                $newCont->setEnv($data['env']);
+                $cManager->run($newCont, null, [], true);
 
-            return $this->redirect($this->generateUrl('am_docker_container_list'));
+                return $this->redirect($this->generateUrl('am_docker_container_list'));
+            }
+
+            $assignation['form'] = $form->createView();
+        } catch (RequestException $e) {
+            $assignation['error'] = $e->getMessage();
         }
-
-        $assignation['form'] = $form->createView();
 
         return $this->render('AMDockerBundle:Container:add.html.twig', $assignation);
     }

@@ -7,10 +7,18 @@
 <div class="page-header">
     <h1>{% trans %}Create a container{% endtrans %}</h1>
 </div>
-{% form_theme form 'bootstrap_3_layout.html.twig' %}
-{{ form(form) }}
+{% if form is defined %}
+    {% form_theme form 'bootstrap_3_layout.html.twig' %}
+    {{ form(form) }}
+{% else %}
+    <div class="alert alert-danger" role="alert">
+        <p><i class="glyphicon glyphicon-exclamation-sign"></i> <strong>{% trans %}LittleShip could not connect to your Docker…{% endtrans %}</strong></p>
+        {% if error is defined %}
+        <p>{{ error }}</p>
+        {% endif %}
+    </div>
+{% endif %}
 {% endblock %}
-
 
 {% block javascripts %}
 <script src="{{ asset('bundles/amdocker/js/add-container.js') }}"></script>

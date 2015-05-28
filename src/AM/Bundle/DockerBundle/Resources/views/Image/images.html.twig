@@ -5,11 +5,12 @@
 <div class="page-header">
     <div class="navbar-form navbar-right">
         <div class="form-group">
-
+            <a href="{{ path('am_docker_images_search') }}" class="btn btn-primary"><i class="glyphicon glyphicon-search"></i> {% trans %}Search an image{% endtrans %}</a>
         </div>
     </div>
     <h1>{% trans %}Images{% endtrans %}</h1>
 </div>
+{% if images is defined %}
 <table class="table  table-striped">
     <thead>
         <tr>
@@ -24,5 +25,13 @@
     </tr>
     {% endfor %}
 </table>
+{% else %}
+    <div class="alert alert-danger" role="alert">
+        <p><i class="glyphicon glyphicon-exclamation-sign"></i> <strong>{% trans %}LittleShip could not connect to your Docker…{% endtrans %}</strong></p>
+        {% if error is defined %}
+        <p>{{ error }}</p>
+        {% endif %}
+    </div>
+{% endif %}
 {% endblock %}
 
