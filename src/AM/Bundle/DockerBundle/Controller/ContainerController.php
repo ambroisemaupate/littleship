@@ -26,6 +26,7 @@
 namespace AM\Bundle\DockerBundle\Controller;
 
 use Docker\Container;
+use AM\Bundle\DockerBundle\Entity\Container as ContainerEntity;
 use Docker\Manager\ImageManager;
 use Docker\Manager\ContainerManager;
 use Symfony\Component\HttpFoundation\Request;
@@ -33,6 +34,7 @@ use AM\Bundle\DockerBundle\Form\ContainerType;
 use AM\Bundle\DockerBundle\Docker\ContainerInfos;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use GuzzleHttp\Exception\RequestException;
+use AM\Bundle\DockerBundle\Form\ContainerEntityType;
 
 /**
  * Description.
@@ -86,6 +88,15 @@ class ContainerController extends Controller
         $container = $manager->find($id);
 
         if (null !== $container) {
+
+            $em = $this->get('doctrine')->getEntityManager();
+            $containerEntity = $em->getRepository('AM\Bundle\DockerBundle\Entity\Container')
+                                  ->findOneByContainerId($id);
+
+            if (null !== $containerEntity) {
+                $assignation['containerEntity'] = $containerEntity;
+            }
+
             $manager->inspect($container);
             $assignation['container'] = $container;
             $runtimeInformations = $container->getRuntimeInformations();
@@ -242,7 +253,57 @@ class ContainerController extends Controller
         }
     }
 
-    public function removeAction($id)
+    public function removeAction(Request $request, $id)
+    {
+        if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
+            throw $this->createAccessDeniedException();
+        }
+        $docker = $this->get('docker');
+        $manager = $docker->getContainerManager();
+        $container = $manager->find($id);
+
+        if (null !== $container) {
+            $assignation['container'] = $container;
+            $form = $this->createFormBuilder()
+                        ->add('submit', 'submit', [
+                            'label' => 'Remove container',
+                            'attr' => [
+                                'class' => 'btn btn-danger'
+                            ]
+                        ])
+                        ->getForm();
+            $form->handleRequest($request);
+
+            if ($form->isValid()) {
+
+                // remove container
+                $infos = new ContainerInfos($container);
+                if ($infos->isRunning()) {
+                    $manager->kill($container);
+                }
+                $manager->remove($container);
+
+                // unsync container entity
+                $em = $this->get('doctrine')->getEntityManager();
+                $containerEntity = $em->getRepository('AM\Bundle\DockerBundle\Entity\Container')
+                                      ->findOneByContainerId($id);
+
+                if (null !== $containerEntity) {
+                    $containerEntity->setSynced(false);
+                    $em->flush();
+                }
+                return $this->redirect($this->generateUrl('am_docker_container_list'));
+            }
+
+            $assignation['form'] = $form->createView();
+            return $this->render('AMDockerBundle:Container:remove.html.twig', $assignation);
+
+        } else {
+            throw $this->createNotFoundException();
+        }
+    }
+
+    public function syncAction(Request $request, $id)
     {
         if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
             throw $this->createAccessDeniedException();
@@ -253,12 +314,25 @@ class ContainerController extends Controller
 
         if (null !== $container) {
             $infos = new ContainerInfos($container);
-            if ($infos->isRunning()) {
-                $manager->kill($container);
-            }
-            $manager->remove($container);
-            return $this->redirect($this->generateUrl('am_docker_container_list'));
+            $containerEntity = new ContainerEntity();
+            $containerEntity->setContainerId($id);
+            $containerEntity->setConfiguration(serialize($container->getRuntimeInformations()));
+            $containerEntity->setName($container->getRuntimeInformations()['Name']);
 
+            $form = $this->createForm(new ContainerEntityType(), $containerEntity);
+            $form->handleRequest($request);
+
+            if ($form->isValid()) {
+                $containerEntity->setSynced(true);
+                $em = $this->get('doctrine')->getEntityManager();
+                $em->persist($containerEntity);
+                $em->flush();
+
+                return $this->redirect($this->generateUrl('am_docker_container_details', ['id'=>$id]));
+            }
+
+            $assignation['form'] = $form->createView();
+            return $this->render('AMDockerBundle:Container:sync.html.twig', $assignation);
         } else {
             throw $this->createNotFoundException();
         }

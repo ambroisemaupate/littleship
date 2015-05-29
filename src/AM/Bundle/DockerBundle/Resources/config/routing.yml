@@ -22,6 +22,9 @@ am_docker_container_stop:
 am_docker_container_remove:
     path:     /container/remove/{id}
     defaults: { _controller: AMDockerBundle:Container:remove }
+am_docker_container_sync:
+    path:     /container/sync/{id}
+    defaults: { _controller: AMDockerBundle:Container:sync }
 
 
 am_docker_images:

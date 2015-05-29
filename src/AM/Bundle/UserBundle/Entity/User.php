@@ -3,6 +3,8 @@
 
 namespace AM\Bundle\UserBundle\Entity;
 
+use AM\Bundle\DockerBundle\Entity\Container;
+use AM\Bundle\DockerBundle\Entity\TemplateInstance;
 use FOS\UserBundle\Model\User as BaseUser;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -30,12 +32,18 @@ class User extends BaseUser
      */
     protected $instanceMaxCount = 0;
 
+    /**
+     * @ORM\OneToMany(targetEntity="AM\Bundle\DockerBundle\Entity\Container", mappedBy="user")
+     */
+    protected $containers = null;
+
 
     public function __construct()
     {
         parent::__construct();
         // your own logic
         $this->templateInstances = new ArrayCollection();
+        $this->containers = new ArrayCollection();
     }
 
     /**
@@ -79,9 +87,74 @@ class User extends BaseUser
      *
      * @return self
      */
-    public function setTemplateInstances($templateInstances)
+    protected function setTemplateInstances($templateInstances)
     {
         $this->templateInstances = $templateInstances;
+
+        return $this;
+    }
+
+    /**
+     * Add a templateInstance.
+     *
+     * @param TemplateInstance $templateInstance the templateInstance
+     *
+     * @return self
+     */
+    public function addTemplateInstance(TemplateInstance $templateInstance)
+    {
+        if (!$this->templateInstances->contains($templateInstance)) {
+            $this->templateInstances->add($templateInstance);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Gets the value of containers.
+     *
+     * @return mixed
+     */
+    public function getContainers()
+    {
+        return $this->containers;
+    }
+
+    /**
+     * Add a container.
+     *
+     * @param Container $container the containers
+     *
+     * @return self
+     */
+    public function addContainer(Container $container)
+    {
+        if (!$this->containers->contains($container)) {
+            $this->containers->add($container);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param  Container $container
+     * @return boolean
+     */
+    public function hasContainer(Container $container)
+    {
+        return $this->containers->contains($container);
+    }
+
+    /**
+     * Sets the value of containers.
+     *
+     * @param mixed $containers the containers
+     *
+     * @return self
+     */
+    protected function setContainers($containers)
+    {
+        $this->containers = $containers;
 
         return $this;
     }

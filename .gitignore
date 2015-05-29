@@ -12,5 +12,6 @@
 /web/bundles/
 /web/vendor/
 /node_modules/
+composer.lock
 # NFS share ghost files
 ._*
