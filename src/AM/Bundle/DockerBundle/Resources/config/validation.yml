@@ -1,0 +1,4 @@
+AM\Bundle\DockerBundle\Entity\Container:
+    constraints:
+        - Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity: containerId
+        - Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity: name
