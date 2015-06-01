@@ -39,7 +39,7 @@ class UserController extends Controller
 
         $assignation = [];
         $users = $this->get('doctrine')
-                        ->getEntityManager()
+                        ->getManager()
                         ->getRepository('AM\Bundle\UserBundle\Entity\User')
                         ->findBy([], ['username' => 'ASC']);
 
@@ -56,7 +56,7 @@ class UserController extends Controller
 
         $assignation = [];
         $user = $this->get('doctrine')
-                        ->getEntityManager()
+                        ->getManager()
                         ->find('AM\Bundle\UserBundle\Entity\User', $id);
 
         $form = $this->createForm(new UserType(), $user);
@@ -64,7 +64,7 @@ class UserController extends Controller
         if ($form->isValid()) {
 
             $this->get('doctrine')
-                        ->getEntityManager()
+                        ->getManager()
                         ->flush();
             return $this->redirect($this->generateUrl('am_user_edit', ['id'=>$id]));
         }

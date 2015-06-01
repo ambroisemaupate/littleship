@@ -26,6 +26,7 @@
 namespace AM\Bundle\DockerBundle\Docker;
 
 use Docker\Container;
+use Docker\Manager\ContainerManager;
 
 /**
  * Docker container wrapper class
@@ -49,5 +50,57 @@ class ContainerInfos
         }
 
         return false;
+    }
+
+    public function getDetailsAssignation(ContainerManager $manager, array &$assignation)
+    {
+        $manager->inspect($this->container);
+        $assignation['container'] = $this->container;
+        $runtimeInformations = $this->container->getRuntimeInformations();
+
+        if (count($runtimeInformations['HostConfig']['Links']) > 0) {
+            $assignation['linkedContainers'] = $runtimeInformations['HostConfig']['Links'];
+        }
+        if (count($runtimeInformations['HostConfig']['VolumesFrom']) > 0) {
+            $assignation['volumesFromContainers'] = $runtimeInformations['HostConfig']['VolumesFrom'];
+        }
+        if (isset($runtimeInformations['HostConfig']['RestartPolicy'])) {
+            $assignation['restartPolicy'] = $runtimeInformations['HostConfig']['RestartPolicy'];
+        }
+
+        if (isset($runtimeInformations['State']['FinishedAt'])) {
+            $date = explode('.', $runtimeInformations['State']['FinishedAt']);
+            if (count($date) > 1) {
+                $assignation['FinishedAt'] = new \DateTime($date[0] . 'Z');
+            } else {
+                $assignation['FinishedAt'] = new \DateTime($runtimeInformations['State']['FinishedAt']);
+            }
+        }
+        if (isset($runtimeInformations['State']['StartedAt'])) {
+            $date = explode('.', $runtimeInformations['State']['StartedAt']);
+            if (count($date) > 1) {
+                $assignation['StartedAt'] = new \DateTime($date[0] . 'Z');
+            } else {
+                $assignation['StartedAt'] = new \DateTime($runtimeInformations['State']['StartedAt']);
+            }
+
+            $now = new \DateTime();
+            $assignation['RunningAge'] = $now->diff($assignation['StartedAt'], true);
+        }
+        if (isset($runtimeInformations['Created'])) {
+            $date = explode('.', $runtimeInformations['Created']);
+            if (count($date) > 1) {
+                $assignation['Created'] = new \DateTime($date[0] . 'Z');
+            } else {
+                $assignation['Created'] = new \DateTime($runtimeInformations['Created']);
+            }
+
+            $now = new \DateTime();
+            $assignation['Age'] = $now->diff($assignation['Created'], true);
+        }
+
+        $assignation['logs'] =  $manager->logs($this->container, false, true, true, false, 100);
+
+        return $assignation;
     }
 }

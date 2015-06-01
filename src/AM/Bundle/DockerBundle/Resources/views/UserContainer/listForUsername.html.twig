@@ -1,0 +1,77 @@
+{% extends 'default/index.html.twig' %}
+
+{% set cRoute = app.request.attributes.get('_route') %}
+
+{% block title %}{% trans %}Containers{% endtrans %}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="navbar-form navbar-right">
+        <div class="form-group">
+
+        </div>
+    </div>
+    <h1>{{ '%username%’s containers'|trans({'%username%': user.username}) }}</h1>
+</div>
+
+{% if containers is defined %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>{% trans %}Name{% endtrans %}</th>
+                <th class="hidden-xs">{% trans %}Image{% endtrans %}</th>
+                <th class="hidden-xs">{% trans %}Ports{% endtrans %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for key, container in containers %}
+            {% if container.runtimeInformations.State.Running %}
+            {% set status = 'running' %}
+            {% elseif container.runtimeInformations.State.Paused %}
+            {% set status = 'paused' %}
+            {% elseif container.runtimeInformations.State.Dead %}
+            {% set status = 'dead' %}
+            {% else %}
+            {% set status = 'exited' %}
+            {% endif %}
+
+            {% set containerEntity = containerEntities[key] %}
+            <tr class="{{ status }}">
+                <td class="name">
+                    {% if status == 'running' %}
+                    <i class="glyphicon glyphicon-ok-circle"></i>
+                    {% elseif status == 'exited' %}
+                    <i class="glyphicon glyphicon-ban-circle"></i>
+                    {% elseif status == 'dead' %}
+                    <i class="glyphicon glyphicon-exclamation-sign"></i>
+                    {% endif %}
+
+                    {% if container.runtimeInformations.Name is defined %}
+                    <a href="{{ path('am_docker_container_details', {id:container.id}) }}">{{ container.runtimeInformations.Name }}</a>
+                    {% endif %}
+                </td>
+                <td class="image hidden-xs">{{ container.runtimeInformations.Config.Image }}</td>
+                <td class="ports hidden-xs">
+                    {% for port, settings in container.runtimeInformations.NetworkSettings.Ports %}
+                    <p>
+                        <span class="private">{{ port }}</span>
+                        {% for setting in settings %}
+                        <span class="public">{{ setting.HostIp }}:{{ setting.HostPort }}</span>
+                        {% endfor %}
+                    </p>
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <div class="alert alert-danger" role="alert">
+        <p><i class="glyphicon glyphicon-exclamation-sign"></i> <strong>{% trans %}LittleShip could not connect to your Docker…{% endtrans %}</strong></p>
+        {% if error is defined %}
+        <p>{{ error }}</p>
+        {% endif %}
+    </div>
+{% endif %}
+
+{% endblock %}

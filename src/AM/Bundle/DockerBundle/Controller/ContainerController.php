@@ -83,13 +83,15 @@ class ContainerController extends Controller
         if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
             throw $this->createAccessDeniedException();
         }
+
         $docker = $this->get('docker');
         $manager = $docker->getContainerManager();
         $container = $manager->find($id);
+        $assignation = [];
 
         if (null !== $container) {
 
-            $em = $this->get('doctrine')->getEntityManager();
+            $em = $this->get('doctrine')->getManager();
             $containerEntity = $em->getRepository('AM\Bundle\DockerBundle\Entity\Container')
                                   ->findOneByContainerId($id);
 
@@ -97,53 +99,8 @@ class ContainerController extends Controller
                 $assignation['containerEntity'] = $containerEntity;
             }
 
-            $manager->inspect($container);
-            $assignation['container'] = $container;
-            $runtimeInformations = $container->getRuntimeInformations();
-
-            if (count($runtimeInformations['HostConfig']['Links']) > 0) {
-                $assignation['linkedContainers'] = $runtimeInformations['HostConfig']['Links'];
-            }
-            if (count($runtimeInformations['HostConfig']['VolumesFrom']) > 0) {
-                $assignation['volumesFromContainers'] = $runtimeInformations['HostConfig']['VolumesFrom'];
-            }
-            if (isset($runtimeInformations['HostConfig']['RestartPolicy'])) {
-                $assignation['restartPolicy'] = $runtimeInformations['HostConfig']['RestartPolicy'];
-            }
-
-            if (isset($runtimeInformations['State']['FinishedAt'])) {
-                $date = explode('.', $runtimeInformations['State']['FinishedAt']);
-                if (count($date) > 1) {
-                    $assignation['FinishedAt'] = new \DateTime($date[0] . 'Z');
-                } else {
-                    $assignation['FinishedAt'] = new \DateTime($runtimeInformations['State']['FinishedAt']);
-                }
-            }
-            if (isset($runtimeInformations['State']['StartedAt'])) {
-                $date = explode('.', $runtimeInformations['State']['StartedAt']);
-                if (count($date) > 1) {
-                    $assignation['StartedAt'] = new \DateTime($date[0] . 'Z');
-                } else {
-                    $assignation['StartedAt'] = new \DateTime($runtimeInformations['State']['StartedAt']);
-                }
-
-                $now = new \DateTime();
-                $assignation['RunningAge'] = $now->diff($assignation['StartedAt'], true);
-            }
-            if (isset($runtimeInformations['Created'])) {
-                $date = explode('.', $runtimeInformations['Created']);
-                if (count($date) > 1) {
-                    $assignation['Created'] = new \DateTime($date[0] . 'Z');
-                } else {
-                    $assignation['Created'] = new \DateTime($runtimeInformations['Created']);
-                }
-
-                $now = new \DateTime();
-                $assignation['Age'] = $now->diff($assignation['Created'], true);
-            }
-
-
-            $assignation['logs'] =  $manager->logs($container, false, true, true, false, 100);
+            $containerInfos = new ContainerInfos($container);
+            $containerInfos->getDetailsAssignation($manager, $assignation);
 
             return $this->render('AMDockerBundle:Container:details.html.twig', $assignation);
 
@@ -253,6 +210,29 @@ class ContainerController extends Controller
         }
     }
 
+    public function restartAction($id)
+    {
+        if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
+            throw $this->createAccessDeniedException();
+        }
+        $docker = $this->get('docker');
+        $manager = $docker->getContainerManager();
+        $container = $manager->find($id);
+
+        if (null !== $container) {
+            $infos = new ContainerInfos($container);
+            if ($infos->isRunning()) {
+                $manager->restart($container);
+            }
+            return $this->redirect($this->generateUrl('am_docker_container_details', [
+                'id' => $id
+            ]));
+
+        } else {
+            throw $this->createNotFoundException();
+        }
+    }
+
     public function removeAction(Request $request, $id)
     {
         if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
@@ -284,7 +264,7 @@ class ContainerController extends Controller
                 $manager->remove($container);
 
                 // unsync container entity
-                $em = $this->get('doctrine')->getEntityManager();
+                $em = $this->get('doctrine')->getManager();
                 $containerEntity = $em->getRepository('AM\Bundle\DockerBundle\Entity\Container')
                                       ->findOneByContainerId($id);
 
@@ -324,7 +304,7 @@ class ContainerController extends Controller
 
             if ($form->isValid()) {
                 $containerEntity->setSynced(true);
-                $em = $this->get('doctrine')->getEntityManager();
+                $em = $this->get('doctrine')->getManager();
                 $em->persist($containerEntity);
                 $em->flush();
 
@@ -336,5 +316,49 @@ class ContainerController extends Controller
         } else {
             throw $this->createNotFoundException();
         }
+    }
+
+    public function unsyncAction(Request $request, $id)
+    {
+        if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
+            throw $this->createAccessDeniedException();
+        }
+        $em = $this->get('doctrine')->getManager();
+        $containerEntity = $em->find('AM\Bundle\DockerBundle\Entity\Container', $id);
+
+        if (null === $containerEntity) {
+            throw $this->createNotFoundException();
+        }
+        if (null === $containerEntity->getUser()) {
+            throw $this->createNotFoundException();
+        }
+
+        $docker = $this->get('docker');
+        $manager = $docker->getContainerManager();
+        $container = $manager->find($containerEntity->getContainerId());
+        $assignation['container'] = $container;
+
+        if (null === $container) {
+            throw $this->createNotFoundException();
+        }
+
+        $form = $this->createFormBuilder()
+                    ->add('submit', 'submit', [
+                        'label' => 'Un-sync container',
+                        'attr' => [
+                            'class' => 'btn btn-danger'
+                        ]
+                    ])
+                    ->getForm();
+        $form->handleRequest($request);
+
+        if ($form->isValid()) {
+            $em->remove($containerEntity);
+            $em->flush();
+            return $this->redirect($this->generateUrl('am_docker_container_details', ['id'=>$containerEntity->getContainerId()]));
+        }
+
+        $assignation['form'] = $form->createView();
+        return $this->render('AMDockerBundle:Container:unsync.html.twig', $assignation);
     }
 }

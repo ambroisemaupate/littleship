@@ -24,17 +24,16 @@
                 <td>
                     <a href="{{ path('am_docker_container_details', {'id':container.containerId}) }}">{{ container.name }}</a>
                 </td>
-                <td>
                 {% if container.synced %}
-                <span class="badge"><i class="glyphicon glyphicon-ok"></i> {% trans %}Synced{% endtrans %}</span>
+                <td><span class="badge"><i class="glyphicon glyphicon-ok"></i> {% trans %}Synced{% endtrans %}</span></td>
+                <td><a href="{{ path('am_docker_container_unsync', {'id': container.id}) }}" class="btn btn-default btn-sm">{% trans %}Un-sync{% endtrans %}</a></td>
                 {% else %}
-                <span class="badge"><i class="glyphicon glyphicon-warning-sign"></i> {% trans %}Un-synced{% endtrans %}</span>
-                <a href="#" class="btn btn-primary btn-sm">{% trans %}Re-run{% endtrans %}</a>
+                <td><span class="badge"><i class="glyphicon glyphicon-warning-sign"></i> {% trans %}Un-synced{% endtrans %}</span></td>
+                <td><a href="#" class="btn btn-primary btn-sm">{% trans %}Re-run{% endtrans %}</a></td>
                 {% endif %}
-                </td>
             </tr>
             {% else %}
-            <tr class="no-containers"><td colspan="2">{% trans %}No containers linked{% endtrans %}</td></tr>
+            <tr class="no-containers"><td colspan="2"><em>{% trans %}No containers linked{% endtrans %}</em></td></tr>
             {% endfor %}
         </table>
     </div>
@@ -42,15 +41,15 @@
         <div class="panel-heading">
             <h2 class="panel-title instances-title">{% trans %}Instances{% endtrans %}</h2>
         </div>
-        <div class="panel-body">
-            <ul>
-                {% for instance in user.templateInstances %}
-                <li>{{ instance.name }}</li>
+        <table class="panel-body table">
+            {% for instance in user.templateInstances %}
+            <tr>
+                <td>{{ instance.name }}</td>
                 {% else %}
-                <li class="no-instances">{% trans %}No instances linked{% endtrans %}</li>
-                {% endfor %}
-            </ul>
-        </div>
+                <td class="no-instances"><em>{% trans %}No instances linked{% endtrans %}</em></td>
+            </tr>
+            {% endfor %}
+        </table>
     </div>
 </div>
 <div class="col-md-6 form">
