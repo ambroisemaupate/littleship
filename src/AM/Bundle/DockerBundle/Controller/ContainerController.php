@@ -141,7 +141,12 @@ class ContainerController extends Controller
                 $newCont->setExposedPorts($this->getExposedPorts($data['ports']));
                 $newCont->setName($data['name']);
                 $newCont->setEnv($data['env']);
+
                 $cManager->run($newCont, null, [], true);
+                $this->get('logger')->info('New container created', [
+                    'name' => $newCont->getName(),
+                    'config' => $newCont->getConfig()
+                ]);
 
                 return $this->redirect($this->generateUrl('am_docker_container_list'));
             }
@@ -177,6 +182,10 @@ class ContainerController extends Controller
             $infos = new ContainerInfos($container);
             if (!$infos->isRunning()) {
                 $manager->start($container);
+                $this->get('logger')->info('Started container', [
+                    'name' => $container->getName(),
+                    'config' => $container->getConfig()
+                ]);
             }
             return $this->redirect($this->generateUrl('am_docker_container_details', [
                 'id' => $id
@@ -200,6 +209,10 @@ class ContainerController extends Controller
             $infos = new ContainerInfos($container);
             if ($infos->isRunning()) {
                 $manager->stop($container, 2);
+                $this->get('logger')->info('Stopped container', [
+                    'name' => $container->getName(),
+                    'config' => $container->getConfig()
+                ]);
             }
             return $this->redirect($this->generateUrl('am_docker_container_details', [
                 'id' => $id
@@ -223,6 +236,10 @@ class ContainerController extends Controller
             $infos = new ContainerInfos($container);
             if ($infos->isRunning()) {
                 $manager->restart($container);
+                $this->get('logger')->info('Restarted container', [
+                    'name' => $container->getName(),
+                    'config' => $container->getConfig()
+                ]);
             }
             return $this->redirect($this->generateUrl('am_docker_container_details', [
                 'id' => $id
@@ -272,6 +289,10 @@ class ContainerController extends Controller
                     $containerEntity->setSynced(false);
                     $em->flush();
                 }
+                $this->get('logger')->info('Removed container', [
+                    'name' => $container->getName(),
+                    'config' => $container->getConfig()
+                ]);
                 return $this->redirect($this->generateUrl('am_docker_container_list'));
             }
 
