@@ -39,6 +39,8 @@
             {% set status = 'exited' %}
             {% elseif 'Dead' in container.data.Status %}
             {% set status = 'dead' %}
+            {% else %}
+            {% set status = '' %}
             {% endif %}
 
             <tr class="{{ status }}">

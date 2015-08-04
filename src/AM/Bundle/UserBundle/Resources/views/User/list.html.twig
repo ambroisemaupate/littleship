@@ -34,6 +34,9 @@
                 </a>
                 {% endif %}
                 <a href="{{ path('am_user_edit', {id: user.id}) }}" class="edit btn btn-sm btn-default">{% trans %}Edit{% endtrans %}</a>
+                {% if is_granted("ROLE_SUPER_ADMIN") %}
+                <a href="{{ path('am_docker_homepage', {"_switch_user": user.username}) }}" class="switch btn btn-sm btn-default">{% trans %}impersonate{% endtrans %}</a>
+                {% endif %}
             </td>
             <td class="email">{{ user.email }}</td>
             <td class="last-login">{{ user.lastLogin|localizeddate('medium', 'short') }}</td>

@@ -35,6 +35,7 @@ use AM\Bundle\DockerBundle\Docker\ContainerInfos;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use GuzzleHttp\Exception\RequestException;
 use AM\Bundle\DockerBundle\Form\ContainerEntityType;
+use Docker\Json;
 
 /**
  * Description.
@@ -126,21 +127,37 @@ class ContainerController extends Controller
 
             if ($form->isValid()) {
                 $data = $form->getData();
-                $newCont = new Container([
+
+                $configuration = [
                     'HostConfig' => [
-                        'Links' => $data['links'],
-                        'VolumesFrom' => $data['volumes_from'],
                         'PublishAllPorts' => (boolean) $data['publish_ports'],
                         'RestartPolicy' => [
                             'Name' => $data['restart_policy'],
                             'MaximumRetryCount' => 0
                         ]
                     ]
-                ]);
+                ];
+                if (isset($data['links']) && count($data['links']) > 0) {
+                    $configuration['HostConfig']['Links'] = $data['links'];
+                }
+                if (isset($data['volumes_from']) && count($data['volumes_from']) > 0) {
+                    $configuration['HostConfig']['VolumesFrom'] = $data['volumes_from'];
+                }
+                $exposedPorts = $this->getExposedPorts($data['ports']);
+
+                $newCont = new Container($configuration);
                 $newCont->setImage($data['image']);
-                $newCont->setExposedPorts($this->getExposedPorts($data['ports']));
+
+                // Test if exposed ports are set and not empty before setting it
+                if (count($exposedPorts) > 0) {
+                    $newCont->setExposedPorts($exposedPorts);
+                }
                 $newCont->setName($data['name']);
-                $newCont->setEnv($data['env']);
+
+                // Test if env is set and not empty before setting it
+                if (isset($data['env']) && count($data['env']) > 0) {
+                    $newCont->setEnv($data['env']);
+                }
 
                 $cManager->run($newCont, null, [], true);
                 $this->get('logger')->info('New container created', [
@@ -159,7 +176,7 @@ class ContainerController extends Controller
         return $this->render('AMDockerBundle:Container:add.html.twig', $assignation);
     }
 
-    protected function getExposedPorts($ports)
+    protected function getExposedPorts(array &$ports)
     {
         $expPorts = [];
         foreach ($ports as $port) {
