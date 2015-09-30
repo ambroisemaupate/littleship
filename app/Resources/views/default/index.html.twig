@@ -27,6 +27,10 @@
                 <li class="nav-item {% if cRoute == 'am_user_list' %}active{% endif %}">
                     <a href="{{ path('am_user_list') }}">{% trans %}Users{% endtrans %}</a>
                 </li>
+                {% elseif is_granted("ROLE_USER") %}
+                <li class="nav-item {% if cRoute == 'am_docker_usercontainer_list' %}active{% endif %}">
+                    <a href="{{ path('am_docker_usercontainer_list') }}">{% trans %}My containers{% endtrans %}</a>
+                </li>
                 {% endif %}
             </ul>
             <div class="navbar-right">
@@ -45,6 +49,9 @@
                                 {{ 'layout.logout'|trans({}, 'FOSUserBundle') }}
                             </a>
                         </li>
+                        {% if is_granted('ROLE_PREVIOUS_ADMIN') %}
+                        <li class="nav-item"><a href="{{ path('am_docker_homepage', {'_switch_user': '_exit'}) }}">{% trans %}exit.impersonation{% endtrans %}</a></li>
+                        {% endif %}
                     </ul>
                 {% else %}
                     <ul class="nav navbar-nav">

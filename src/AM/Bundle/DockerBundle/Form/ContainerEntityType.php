@@ -20,60 +20,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  *
- * @file AvailableLinksType.php
+ * @file ContainerEntityType.php
  * @author Ambroise Maupate
  */
 namespace AM\Bundle\DockerBundle\Form;
 
-use Docker\Manager\ContainerManager;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Symfony\Component\Form\FormBuilderInterface;
 
 /**
- * AvailableContainersType.
+ * ContainerType.
  */
-class AvailableLinksType extends AbstractType
+class ContainerEntityType extends AbstractType
 {
-    protected $manager;
-
-    public function __construct(ContainerManager $manager)
+    public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $this->manager = $manager;
-    }
-
-    public function setDefaultOptions(OptionsResolverInterface $resolver)
-    {
-        $containers = $this->manager->findAll([
-            'all' => true
+        $builder->add('user', 'entity', array(
+            'class' => 'AMUserBundle:User',
+            'query_builder' => function(EntityRepository $er) {
+                return $er->createQueryBuilder('u')
+                    ->orderBy('u.username', 'ASC');
+            },
+        ))
+        ->add('submit', 'submit', [
+            'label' => 'Sync container',
+            'attr' => [
+                'class' => 'btn btn-primary'
+            ]
         ]);
-        $options = [];
-
-        foreach ($containers as $container) {
-            $name = $container->getName() != "" ? $container->getName() : $container->getData()['Names'][0];
-            $imageName = $container->getData()['Image'];
-            $imageName = explode(':', $imageName);
-            $repository = explode('/', $imageName[0]);
-
-            if (isset($repository[1])) {
-                $linkName = $name . ':' . $repository[1];
-            } else {
-                $linkName = $name . ':' . $repository[0];
-            }
-            $options[$linkName] = $linkName;
-        }
-
-        $resolver->setDefaults(array(
-            'choices' => $options
-        ));
-    }
-
-    public function getParent()
-    {
-        return 'choice';
     }
 
     public function getName()
     {
-        return 'availablelinks';
+        return 'containerentity';
     }
 }

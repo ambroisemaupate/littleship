@@ -13,17 +13,46 @@
     </div>
     <h1>{{ user.username }}</h1>
 </div>
-<div class="instances col-md-4">
-    <h2 class="instances-title">{% trans %}Instances{% endtrans %}</h2>
-    <ul>
-        {% for instance in user.templateInstances %}
-        <li>{{ instance.name }}</li>
-        {% else %}
-        <li class="no-instances">{% trans %}No instances linked{% endtrans %}</li>
-        {% endfor %}
-    </ul>
+<div class="instances col-md-6">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h2 class="panel-title containers-title">{% trans %}Containers{% endtrans %}</h2>
+        </div>
+        <table class="panel-body table">
+            {% for container in user.containers %}
+            <tr>
+                <td>
+                    <a href="{{ path('am_docker_container_details', {'id':container.containerId}) }}">{{ container.name }}</a>
+                </td>
+                {% if container.synced %}
+                <td><span class="badge"><i class="glyphicon glyphicon-ok"></i> {% trans %}Synced{% endtrans %}</span></td>
+                <td><a href="{{ path('am_docker_container_unsync', {'id': container.id}) }}" class="btn btn-default btn-sm">{% trans %}Un-sync{% endtrans %}</a></td>
+                {% else %}
+                <td><span class="badge"><i class="glyphicon glyphicon-warning-sign"></i> {% trans %}Un-synced{% endtrans %}</span></td>
+                <td><a href="#" class="btn btn-primary btn-sm">{% trans %}Re-run{% endtrans %}</a></td>
+                {% endif %}
+            </tr>
+            {% else %}
+            <tr class="no-containers"><td colspan="2"><em>{% trans %}No containers linked{% endtrans %}</em></td></tr>
+            {% endfor %}
+        </table>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h2 class="panel-title instances-title">{% trans %}Instances{% endtrans %}</h2>
+        </div>
+        <table class="panel-body table">
+            {% for instance in user.templateInstances %}
+            <tr>
+                <td>{{ instance.name }}</td>
+                {% else %}
+                <td class="no-instances"><em>{% trans %}No instances linked{% endtrans %}</em></td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
 </div>
-<div class="col-md-8 form">
+<div class="col-md-6 form">
     <h2 class="edit-infos">{% trans %}User informations{% endtrans %}</h2>
     {{ form(form) }}
 </div>

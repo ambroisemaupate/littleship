@@ -1,0 +1,24 @@
+{% extends 'default/index.html.twig' %}
+
+
+{% block title %}{% trans %}Un-sync a container from user{% endtrans %}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{% trans %}Un-sync a container from user{% endtrans %}</h1>
+</div>
+{% if form is defined %}
+    <div class="simple-confirmation-form">
+        <a class="btn btn-default" href="{{ path('am_docker_container_details', {'id':container.id}) }}">{% trans %}Cancel{% endtrans %}</a>
+        {% form_theme form 'bootstrap_3_layout.html.twig' %}
+        {{ form(form) }}
+    </div>
+{% else %}
+    <div class="alert alert-danger" role="alert">
+        <p><i class="glyphicon glyphicon-exclamation-sign"></i> <strong>{% trans %}LittleShip could not connect to your Docker…{% endtrans %}</strong></p>
+        {% if error is defined %}
+        <p>{{ error }}</p>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}

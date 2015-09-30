@@ -4,11 +4,11 @@
         <body>
             <trans-unit id="exit.impersonation">
                 <source>exit.impersonation</source>
-                <target>Quitter l’utilisateur</target>
+                <target>Exit user</target>
             </trans-unit>
             <trans-unit id="impersonate">
                 <source>impersonate</source>
-                <target>Prendre les droits</target>
+                <target>Impersonate</target>
             </trans-unit>
         </body>
     </file>

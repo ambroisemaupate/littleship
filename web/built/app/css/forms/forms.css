@@ -11,3 +11,9 @@
 .add-delete-form-type + .add-type-button {
   margin-top: 10px;
 }
+.simple-confirmation-form > .btn {
+  display: inline-block;
+}
+.simple-confirmation-form > form {
+  display: inline-block;
+}

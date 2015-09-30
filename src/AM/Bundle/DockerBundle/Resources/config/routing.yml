@@ -19,9 +19,47 @@ am_docker_container_start:
 am_docker_container_stop:
     path:     /container/stop/{id}
     defaults: { _controller: AMDockerBundle:Container:stop }
+am_docker_container_restart:
+    path:     /container/restart/{id}
+    defaults: { _controller: AMDockerBundle:Container:restart }
 am_docker_container_remove:
     path:     /container/remove/{id}
     defaults: { _controller: AMDockerBundle:Container:remove }
+am_docker_container_sync:
+    path:     /container/sync/{id}
+    defaults: { _controller: AMDockerBundle:Container:sync }
+am_docker_container_unsync:
+    path:     /container/unsync/{id}
+    defaults: { _controller: AMDockerBundle:Container:unsync }
+
+am_docker_usercontainer_list:
+    path:     /user-containers
+    defaults: { _controller: AMDockerBundle:UserContainer:list }
+am_docker_usercontainer_listforusername:
+    path:     /user-containers/{username}
+    defaults: { _controller: AMDockerBundle:UserContainer:listForUsername }
+    requirements:
+        username: "[0-9a-zA-Z_\-\.]+"
+am_docker_usercontainer_details:
+    path:     /user-container/{id}
+    defaults: { _controller: AMDockerBundle:UserContainer:details }
+    requirements:
+        id: "[0-9]+"
+am_docker_usercontainer_start:
+    path:     /user-container/start/{id}
+    defaults: { _controller: AMDockerBundle:UserContainer:start }
+    requirements:
+        id: "[0-9]+"
+am_docker_usercontainer_stop:
+    path:     /user-container/stop/{id}
+    defaults: { _controller: AMDockerBundle:UserContainer:stop }
+    requirements:
+        id: "[0-9]+"
+am_docker_usercontainer_restart:
+    path:     /user-container/restart/{id}
+    defaults: { _controller: AMDockerBundle:UserContainer:restart }
+    requirements:
+        id: "[0-9]+"
 
 
 am_docker_images:

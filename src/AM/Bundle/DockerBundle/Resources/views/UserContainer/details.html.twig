@@ -11,11 +11,10 @@
     <div class="navbar-form navbar-right">
         <div class="form-group">
             {% if running %}
-            <a href="{{ path('am_docker_container_restart', {id:container.id}) }}" class="btn btn btn-default">{% trans %}Restart{% endtrans %}</a>
-            <a href="{{ path('am_docker_container_stop', {id:container.id}) }}" class="btn btn btn-warning">{% trans %}Stop{% endtrans %}</a>
+            <a href="{{ path('am_docker_usercontainer_restart', {id:containerEntity.id}) }}" class="btn btn btn-default">{% trans %}Restart{% endtrans %}</a>
+            <a href="{{ path('am_docker_usercontainer_stop', {id:containerEntity.id}) }}" class="btn btn btn-warning">{% trans %}Stop{% endtrans %}</a>
             {% else %}
-            <a href="{{ path('am_docker_container_start', {id:container.id}) }}" class="btn btn-default">{% trans %}Start{% endtrans %}</a>
-            <a href="{{ path('am_docker_container_remove', {id:container.id}) }}" class="btn btn btn-danger">{% trans %}Remove{% endtrans %}</a>
+            <a href="{{ path('am_docker_usercontainer_start', {id:containerEntity.id}) }}" class="btn btn-primary">{% trans %}Start{% endtrans %}</a>
             {% endif %}
         </div>
     </div>
@@ -153,22 +152,6 @@
     </div>
     {% endif %}
 
-    <div class="col-md-4">
-        <div class="panel panel-default entity">
-            <div class="panel-heading">
-                <h3 class="panel-title">{% trans %}Sync{% endtrans %}</h3>
-            </div>
-            <div class="panel-body">
-                {% if containerEntity is defined and containerEntity.user is not null %}
-                <p>{{ "Container is owned by %username%"|trans({'%username%':containerEntity.user.username}) }}</p>
-                <a href="{{ path('am_user_edit', {id:containerEntity.user.id}) }}" class="btn btn-default">{% trans %}See user{% endtrans %}</a>
-                {% else %}
-                <p>{% trans %}Container is not synced with LittleShip{% endtrans %}</p>
-                <a href="{{ path('am_docker_container_sync', {id:container.id}) }}" class="btn btn-default">{% trans %}Sync with LittleShip{% endtrans %}</a>
-                {% endif %}
-            </div>
-        </div>
-    </div>
     {% if logs|length > 0 %}
     <div class="col-md-12">
         <div class="panel panel-default logs">
