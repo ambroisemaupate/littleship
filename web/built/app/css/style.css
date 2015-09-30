@@ -1811,6 +1811,14 @@
   display: inline-block;
   vertical-align: top;
 }
+#app-footer {
+  margin: 20px auto;
+  text-align: center;
+  font-size: 10px;
+  border-top: 1px solid #EFEFEF;
+  padding-top: 20px;
+  color: #D2D2D2;
+}
 .add-delete-form-type .form-group {
   display: table-row;
 }
