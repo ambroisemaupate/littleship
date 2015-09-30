@@ -303,7 +303,7 @@ class ContainerController extends Controller
                                       ->findOneByContainerId($id);
 
                 if (null !== $containerEntity) {
-                    $containerEntity->setSynced(false);
+                    $em->remove($containerEntity);
                     $em->flush();
                 }
                 $this->get('logger')->info('Removed container', [

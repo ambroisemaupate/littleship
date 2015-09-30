@@ -54,7 +54,11 @@ class AvailableLinksType extends AbstractType
             $imageName = explode(':', $imageName);
             $repository = explode('/', $imageName[0]);
 
-            $linkName = $name . ':' . $repository[1];
+            if (isset($repository[1])) {
+                $linkName = $name . ':' . $repository[1];
+            } else {
+                $linkName = $name . ':' . $repository[0];
+            }
             $options[$linkName] = $linkName;
         }
 
