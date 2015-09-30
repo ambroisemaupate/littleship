@@ -25,16 +25,10 @@
  */
 namespace AM\Bundle\DockerBundle\Controller;
 
-use Docker\Container;
-use AM\Bundle\DockerBundle\Entity\Container as ContainerEntity;
-use Docker\Manager\ImageManager;
-use Docker\Manager\ContainerManager;
-use Symfony\Component\HttpFoundation\Request;
-use AM\Bundle\DockerBundle\Form\ContainerType;
 use AM\Bundle\DockerBundle\Docker\ContainerInfos;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Docker\Container;
 use GuzzleHttp\Exception\RequestException;
-use AM\Bundle\DockerBundle\Form\ContainerEntityType;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 class UserContainerController extends Controller
 {
@@ -70,9 +64,9 @@ class UserContainerController extends Controller
         }
 
         $user = $this->get('doctrine')
-                                ->getManager()
-                                ->getRepository('AM\Bundle\UserBundle\Entity\User')
-                                ->findOneByUsername($username);
+            ->getManager()
+            ->getRepository('AM\Bundle\UserBundle\Entity\User')
+            ->findOneByUsername($username);
         if (null === $user) {
             throw $this->createNotFoundException();
         }
@@ -102,8 +96,8 @@ class UserContainerController extends Controller
             throw $this->createAccessDeniedException();
         }
         $containerEntity = $this->get('doctrine')
-                                ->getManager()
-                                ->find('AM\Bundle\DockerBundle\Entity\Container', $id);
+            ->getManager()
+            ->find('AM\Bundle\DockerBundle\Entity\Container', $id);
 
         if (null === $containerEntity) {
             throw $this->createNotFoundException();
@@ -127,15 +121,14 @@ class UserContainerController extends Controller
         return $this->render('AMDockerBundle:UserContainer:details.html.twig', $assignation);
     }
 
-
     public function startAction($id)
     {
         if (!$this->isGranted('ROLE_USER')) {
             throw $this->createAccessDeniedException();
         }
         $containerEntity = $this->get('doctrine')
-                                ->getManager()
-                                ->find('AM\Bundle\DockerBundle\Entity\Container', $id);
+            ->getManager()
+            ->find('AM\Bundle\DockerBundle\Entity\Container', $id);
         if (null === $containerEntity) {
             throw $this->createNotFoundException();
         }
@@ -156,7 +149,7 @@ class UserContainerController extends Controller
             $manager->start($container);
         }
         return $this->redirect($this->generateUrl('am_docker_usercontainer_details', [
-            'id' => $id
+            'id' => $id,
         ]));
     }
 
@@ -166,8 +159,8 @@ class UserContainerController extends Controller
             throw $this->createAccessDeniedException();
         }
         $containerEntity = $this->get('doctrine')
-                                ->getManager()
-                                ->find('AM\Bundle\DockerBundle\Entity\Container', $id);
+            ->getManager()
+            ->find('AM\Bundle\DockerBundle\Entity\Container', $id);
 
         if (null === $containerEntity) {
             throw $this->createNotFoundException();
@@ -189,7 +182,7 @@ class UserContainerController extends Controller
             $manager->stop($container, 2);
         }
         return $this->redirect($this->generateUrl('am_docker_usercontainer_details', [
-            'id' => $id
+            'id' => $id,
         ]));
     }
 
@@ -199,8 +192,8 @@ class UserContainerController extends Controller
             throw $this->createAccessDeniedException();
         }
         $containerEntity = $this->get('doctrine')
-                                ->getManager()
-                                ->find('AM\Bundle\DockerBundle\Entity\Container', $id);
+            ->getManager()
+            ->find('AM\Bundle\DockerBundle\Entity\Container', $id);
 
         if (null === $containerEntity) {
             throw $this->createNotFoundException();
@@ -222,7 +215,7 @@ class UserContainerController extends Controller
             $manager->restart($container);
         }
         return $this->redirect($this->generateUrl('am_docker_usercontainer_details', [
-            'id' => $id
+            'id' => $id,
         ]));
     }
 }

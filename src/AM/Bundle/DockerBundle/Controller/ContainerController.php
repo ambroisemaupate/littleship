@@ -25,17 +25,14 @@
  */
 namespace AM\Bundle\DockerBundle\Controller;
 
-use Docker\Container;
-use AM\Bundle\DockerBundle\Entity\Container as ContainerEntity;
-use Docker\Manager\ImageManager;
-use Docker\Manager\ContainerManager;
-use Symfony\Component\HttpFoundation\Request;
-use AM\Bundle\DockerBundle\Form\ContainerType;
 use AM\Bundle\DockerBundle\Docker\ContainerInfos;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use GuzzleHttp\Exception\RequestException;
+use AM\Bundle\DockerBundle\Entity\Container as ContainerEntity;
 use AM\Bundle\DockerBundle\Form\ContainerEntityType;
-use Docker\Json;
+use AM\Bundle\DockerBundle\Form\ContainerType;
+use Docker\Container;
+use GuzzleHttp\Exception\RequestException;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Description.
@@ -70,7 +67,7 @@ class ContainerController extends Controller
             $docker = $this->get('docker');
             $manager = $docker->getContainerManager();
             $assignation['containers'] = $manager->findAll([
-                'all' => true
+                'all' => true,
             ]);
         } catch (RequestException $e) {
             $assignation['error'] = $e->getMessage();
@@ -94,7 +91,7 @@ class ContainerController extends Controller
 
             $em = $this->get('doctrine')->getManager();
             $containerEntity = $em->getRepository('AM\Bundle\DockerBundle\Entity\Container')
-                                  ->findOneByContainerId($id);
+                ->findOneByContainerId($id);
 
             if (null !== $containerEntity) {
                 $assignation['containerEntity'] = $containerEntity;
@@ -133,9 +130,9 @@ class ContainerController extends Controller
                         'PublishAllPorts' => (boolean) $data['publish_ports'],
                         'RestartPolicy' => [
                             'Name' => $data['restart_policy'],
-                            'MaximumRetryCount' => 0
-                        ]
-                    ]
+                            'MaximumRetryCount' => 0,
+                        ],
+                    ],
                 ];
                 if (isset($data['links']) && count($data['links']) > 0) {
                     $configuration['HostConfig']['Links'] = $data['links'];
@@ -162,7 +159,7 @@ class ContainerController extends Controller
                 $cManager->run($newCont, null, [], true);
                 $this->get('logger')->info('New container created', [
                     'name' => $newCont->getName(),
-                    'config' => $newCont->getConfig()
+                    'config' => $newCont->getConfig(),
                 ]);
 
                 return $this->redirect($this->generateUrl('am_docker_container_list'));
@@ -201,11 +198,11 @@ class ContainerController extends Controller
                 $manager->start($container);
                 $this->get('logger')->info('Started container', [
                     'name' => $container->getName(),
-                    'config' => $container->getConfig()
+                    'config' => $container->getConfig(),
                 ]);
             }
             return $this->redirect($this->generateUrl('am_docker_container_details', [
-                'id' => $id
+                'id' => $id,
             ]));
 
         } else {
@@ -228,11 +225,11 @@ class ContainerController extends Controller
                 $manager->stop($container, 2);
                 $this->get('logger')->info('Stopped container', [
                     'name' => $container->getName(),
-                    'config' => $container->getConfig()
+                    'config' => $container->getConfig(),
                 ]);
             }
             return $this->redirect($this->generateUrl('am_docker_container_details', [
-                'id' => $id
+                'id' => $id,
             ]));
 
         } else {
@@ -255,11 +252,11 @@ class ContainerController extends Controller
                 $manager->restart($container);
                 $this->get('logger')->info('Restarted container', [
                     'name' => $container->getName(),
-                    'config' => $container->getConfig()
+                    'config' => $container->getConfig(),
                 ]);
             }
             return $this->redirect($this->generateUrl('am_docker_container_details', [
-                'id' => $id
+                'id' => $id,
             ]));
 
         } else {
@@ -279,13 +276,13 @@ class ContainerController extends Controller
         if (null !== $container) {
             $assignation['container'] = $container;
             $form = $this->createFormBuilder()
-                        ->add('submit', 'submit', [
-                            'label' => 'Remove container',
-                            'attr' => [
-                                'class' => 'btn btn-danger'
-                            ]
-                        ])
-                        ->getForm();
+                ->add('submit', 'submit', [
+                    'label' => 'Remove container',
+                    'attr' => [
+                        'class' => 'btn btn-danger',
+                    ],
+                ])
+                ->getForm();
             $form->handleRequest($request);
 
             if ($form->isValid()) {
@@ -300,7 +297,7 @@ class ContainerController extends Controller
                 // unsync container entity
                 $em = $this->get('doctrine')->getManager();
                 $containerEntity = $em->getRepository('AM\Bundle\DockerBundle\Entity\Container')
-                                      ->findOneByContainerId($id);
+                    ->findOneByContainerId($id);
 
                 if (null !== $containerEntity) {
                     $em->remove($containerEntity);
@@ -308,7 +305,7 @@ class ContainerController extends Controller
                 }
                 $this->get('logger')->info('Removed container', [
                     'name' => $container->getName(),
-                    'config' => $container->getConfig()
+                    'config' => $container->getConfig(),
                 ]);
                 return $this->redirect($this->generateUrl('am_docker_container_list'));
             }
@@ -346,7 +343,7 @@ class ContainerController extends Controller
                 $em->persist($containerEntity);
                 $em->flush();
 
-                return $this->redirect($this->generateUrl('am_docker_container_details', ['id'=>$id]));
+                return $this->redirect($this->generateUrl('am_docker_container_details', ['id' => $id]));
             }
 
             $assignation['form'] = $form->createView();
@@ -381,19 +378,19 @@ class ContainerController extends Controller
         }
 
         $form = $this->createFormBuilder()
-                    ->add('submit', 'submit', [
-                        'label' => 'Un-sync container',
-                        'attr' => [
-                            'class' => 'btn btn-danger'
-                        ]
-                    ])
-                    ->getForm();
+            ->add('submit', 'submit', [
+                'label' => 'Un-sync container',
+                'attr' => [
+                    'class' => 'btn btn-danger',
+                ],
+            ])
+            ->getForm();
         $form->handleRequest($request);
 
         if ($form->isValid()) {
             $em->remove($containerEntity);
             $em->flush();
-            return $this->redirect($this->generateUrl('am_docker_container_details', ['id'=>$containerEntity->getContainerId()]));
+            return $this->redirect($this->generateUrl('am_docker_container_details', ['id' => $containerEntity->getContainerId()]));
         }
 
         $assignation['form'] = $form->createView();
