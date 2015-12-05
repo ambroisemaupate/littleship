@@ -19,22 +19,18 @@ class ContractType extends AbstractType
             ->add('amount')
             ->add('startedAt', 'date')
             ->add('currency', 'choice', [
+                'label' => 'Currency',
                 'choices' => [
                     'EUR' => 'Euro',
                     'USD' => 'US Dollar',
                 ]
             ])
             ->add('type', 'choice', [
-                'choices' => [
-                    Contract::ANNUAL => 'type.annual',
-                    Contract::QUARTERLY => 'type.quarterly',
-                    Contract::BIMONTHLY => 'type.bimonthly',
-                    Contract::MONTHLY => 'type.monthly',
-                    Contract::WEEKLY => 'type.weekly',
-                ]
+                'label' => 'Type',
+                'choices' => Contract::$typeToHuman,
             ])
             ->add('submit', 'submit', [
-                'label' => 'create.contract',
+                'label' => 'Create contract',
             ]);
     }
 

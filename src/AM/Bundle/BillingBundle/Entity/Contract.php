@@ -20,6 +20,14 @@ class Contract
     const MONTHLY = 4;
     const WEEKLY = 5;
 
+    public static $typeToHuman = [
+        Contract::ANNUAL => 'Annual',
+        Contract::QUARTERLY => 'Quaterly',
+        Contract::BIMONTHLY => 'Bimonthly',
+        Contract::MONTHLY => 'Monthly',
+        Contract::WEEKLY => 'Weekly',
+    ];
+
     /**
      * @var integer
      *
@@ -228,5 +236,43 @@ class Contract
         $this->user = $user;
 
         return $this;
+    }
+
+    /**
+     * Get nomarlized amount on one year.
+     *
+     * @return float
+     */
+    public function getNormalizedAmount()
+    {
+        switch ($this->type) {
+            case static::ANNUAL:
+                return $this->amount;
+                break;
+            case static::QUARTERLY:
+                return $this->amount * 4;
+                break;
+            case static::BIMONTHLY:
+                return $this->amount * 6;
+                break;
+            case static::MONTHLY:
+                return $this->amount * 12;
+                break;
+            case static::WEEKLY:
+                return $this->amount * 52.1775;
+                break;
+
+            default:
+                return $this->amount;
+                break;
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function getHumanType()
+    {
+        return static::$typeToHuman[$this->type];
     }
 }

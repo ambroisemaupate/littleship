@@ -3,3 +3,7 @@ am_billing_contracts:
     defaults: { _controller: AMBillingBundle:Contract:index }
     requirements:
         userId: "[0-9]+"
+
+am_billing_review:
+    path:     /billing
+    defaults: { _controller: AMBillingBundle:Default:index }
