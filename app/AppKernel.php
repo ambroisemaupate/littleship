@@ -20,6 +20,7 @@ class AppKernel extends Kernel
             new AM\Bundle\DockerBundle\AMDockerBundle(),
             new FOS\UserBundle\FOSUserBundle(),
             new AM\Bundle\UserBundle\AMUserBundle(),
+            new AM\Bundle\BillingBundle\AMBillingBundle(),
         );
 
         if (in_array($this->getEnvironment(), array('dev', 'test'))) {
