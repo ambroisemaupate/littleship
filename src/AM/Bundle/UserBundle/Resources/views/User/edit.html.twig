@@ -55,6 +55,8 @@
 <div class="col-md-6 form">
     <h2 class="edit-infos">{% trans %}User informations{% endtrans %}</h2>
     {{ form(form) }}
+    <hr>
+    <a class="btn btn-default" href="{{ path('am_billing_contracts', {userId: user.id}) }}"><i class="glyphicon glyphicon-shopping-cart"></i> {% trans %}User contracts{% endtrans %}</a>
 </div>
 
 {% endblock %}

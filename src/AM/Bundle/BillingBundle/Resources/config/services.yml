@@ -1,0 +1,4 @@
+services:
+#    am_billing.example:
+#        class: AM\Bundle\BillingBundle\Example
+#        arguments: [@service_id, "plain_value", %parameter%]

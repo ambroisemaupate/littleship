@@ -1,0 +1,63 @@
+{% extends 'default/index.html.twig' %}
+
+{% set cRoute = app.request.attributes.get('_route') %}
+
+{% block title %}{% trans %}Billing{% endtrans %}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="navbar-form navbar-right">
+        <div class="form-group">
+
+        </div>
+    </div>
+    <h1>{% trans %}Billing{% endtrans %}</h1>
+</div>
+<div class="instances col-md-6">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h2 class="panel-title containers-title">{% trans %}Active contracts{% endtrans %}</h2>
+        </div>
+        <table class="panel-body table table-condensed">
+            <tr>
+                <th></th>
+                <th>{% trans %}User name{% endtrans %}</th>
+                <th>{% trans %}Started at{% endtrans %}</th>
+                <th>{% trans %}Amount{% endtrans %}</th>
+            </tr>
+            {% for contract in contracts %}
+            <tr>
+                <td>{{ contract.id }}</td>
+                <td><a href="{{ path('am_user_edit', {id: contract.user.id}) }}">{{ contract.user.username }}</a></td>
+                <td>{{ contract.startedAt|localizeddate('medium', 'none') }}</td>
+                <td class="right">{{ contract.amount|localizedcurrency(contract.currency) }}</td>
+            </tr>
+            {% else %}
+            <tr class="no-containers"><td colspan="4"><em>{% trans %}No contracts{% endtrans %}</em></td></tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+<div class="add-contract col-md-6">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h2 class="panel-title containers-title">{% trans %}Annual total{% endtrans %}</h2>
+        </div>
+        <table class="panel-body table table-condensed">
+            <tr>
+                <th>{% trans %}Currency{% endtrans %}</th>
+                <th>{% trans %}Amount per year{% endtrans %}</th>
+            </tr>
+            {% for currency, amount in totalsPerCurrency %}
+            <tr>
+                <td>{{ currency }}</td>
+                <td class="right">{{ amount|localizedcurrency(currency) }}</td>
+            </tr>
+            {% else %}
+            <tr class="no-containers"><td colspan="2"><em>{% trans %}No contracts{% endtrans %}</em></td></tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+
+{% endblock %}

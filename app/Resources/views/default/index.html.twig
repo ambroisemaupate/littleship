@@ -27,6 +27,9 @@
                 <li class="nav-item {% if cRoute == 'am_user_list' %}active{% endif %}">
                     <a href="{{ path('am_user_list') }}">{% trans %}Users{% endtrans %}</a>
                 </li>
+                <li class="nav-item {% if cRoute == 'am_billing_review' %}active{% endif %}">
+                    <a href="{{ path('am_billing_review') }}">{% trans %}Billing{% endtrans %}</a>
+                </li>
                 {% elseif is_granted("ROLE_USER") %}
                 <li class="nav-item {% if cRoute == 'am_docker_usercontainer_list' %}active{% endif %}">
                     <a href="{{ path('am_docker_usercontainer_list') }}">{% trans %}My containers{% endtrans %}</a>

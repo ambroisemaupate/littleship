@@ -1,0 +1,52 @@
+{% extends 'default/index.html.twig' %}
+
+{% set cRoute = app.request.attributes.get('_route') %}
+
+{% block title %}{% trans %}User contracts{% endtrans %}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="navbar-form navbar-right">
+        <div class="form-group">
+
+        </div>
+    </div>
+    <h1>{{ user.username }} — {% trans %}Contracts{% endtrans %}</h1>
+</div>
+<div class="instances col-md-6">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h2 class="panel-title containers-title">{% trans %}Active contracts{% endtrans %}</h2>
+        </div>
+        <table class="panel-body table">
+            <tr>
+                <th></th>
+                <th>{% trans %}Started at{% endtrans %}</th>
+                <th>{% trans %}Amount{% endtrans %}</th>
+                <th>{% trans %}Type{% endtrans %}</th>
+            </tr>
+            {% for contract in contracts %}
+                    <tr>
+                        <td>{{ contract.id }}</td>
+                        <td>{{ contract.startedAt|localizeddate('medium', 'none') }}</td>
+                        <td>{{ contract.amount|localizedcurrency(contract.currency) }}</td>
+                        <td>{{ contract.humanType }}</td>
+                    </tr>
+            {% else %}
+                <tr class="no-containers"><td colspan=""><em>{% trans %}No contract linked{% endtrans %}</em></td></tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+<div class="add-contract col-md-6">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h2 class="panel-title containers-title">{% trans %}Add a contract{% endtrans %}</h2>
+        </div>
+        <div class="panel-body">
+            {{ form(addContractForm) }}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
