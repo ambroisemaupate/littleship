@@ -26,6 +26,9 @@
 namespace AM\Bundle\DockerBundle\Docker;
 
 use Docker\API\Model\Container;
+use Docker\API\Model\ContainerConfig;
+use Docker\API\Model\HostConfig;
+use Docker\API\Model\RestartPolicy;
 use Docker\Manager\ContainerManager;
 
 /**
@@ -50,6 +53,57 @@ class ContainerInfos
         }
 
         return false;
+    }
+
+    /**
+     * @param  array  $data
+     * @return ContainerConfig
+     */
+    public static function getContainerConfigFromData(array $data)
+    {
+        $restartPolicy = new RestartPolicy();
+        $restartPolicy->setName($data['restart_policy']);
+        $restartPolicy->setMaximumRetryCount(0);
+
+        $hostConfig = new HostConfig();
+        $hostConfig->setPublishAllPorts($data['publish_ports']);
+        $hostConfig->setRestartPolicy($restartPolicy);
+        if (isset($data['links']) &&
+            count($data['links']) > 0) {
+            $hostConfig->setLinks($data['links']);
+        }
+        if (isset($data['volumes_from']) && count($data['volumes_from']) > 0) {
+            $hostConfig->setVolumesFrom($data['volumes_from']);
+        }
+
+        $containerConfig = new ContainerConfig();
+        $containerConfig->setExposedPorts(static::getExposedPorts($data['ports']));
+        $containerConfig->setImage($data['image']);
+        $containerConfig->setNames([$data['name']]);
+        $containerConfig->setAttachStdin(false);
+        $containerConfig->setAttachStdout(false);
+        $containerConfig->setAttachStderr(false);
+        $containerConfig->setHostConfig($hostConfig);
+
+        // Test if env is set and not empty before setting it
+        if (isset($data['env']) && count($data['env']) > 0) {
+            $containerConfig->setEnv($data['env']);
+        }
+
+        return $containerConfig;
+    }
+
+    /**
+     * @param array $ports
+     * @return \ArrayObject
+     */
+    protected static function getExposedPorts(array &$ports)
+    {
+        $exposedPorts = [];
+        foreach ($ports as $port) {
+            $exposedPorts[$port] = [];
+        }
+        return new \ArrayObject($exposedPorts);
     }
 
     public function getDetailsAssignation(ContainerManager $manager, array &$assignation)
@@ -90,7 +144,12 @@ class ContainerInfos
         $assignation['Age'] = $now->diff($assignation['Created'], true);
         $assignation['image'] = $this->container->getConfig()->getImage();
         $assignation['running'] = $state->getRunning();
-        $assignation['ports'] = $this->container->getConfig()->getExposedPorts();
+
+        if ($state->getRunning()) {
+            $assignation['ports'] = $this->container->getNetworkSettings()->getPorts();
+        } else {
+            $assignation['ports'] = $this->container->getHostConfig()->getPortBindings();
+        }
         $this->getLogsAssignation($manager, $assignation);
 
         return $assignation;
@@ -114,7 +173,6 @@ class ContainerInfos
     }
 
     /**
-     *
      * @param  ContainerManager $manager      [description]
      * @param  array            &$assignation [description]
      */
@@ -123,10 +181,12 @@ class ContainerInfos
         try {
             $assignation['logs'] =  $manager->logs($this->container->getId(), [
                 'tail' => '100',
+                'stdout' => true,
+                'stderr' => true,
                 'timestamps' => true,
             ]);
         } catch (\Http\Client\Plugin\Exception\ClientErrorException $e) {
-            $assignation['logs'] = [$e->getMessage()];
+            $assignation['logs'] = [$e->getResponse()->getBody()->getContents()];
         }
     }
 }

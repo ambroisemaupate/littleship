@@ -3,7 +3,7 @@
 namespace AM\Bundle\BillingBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use AM\Bundle\BillingBundle\Entity\Contact;
+
 use AM\Bundle\UserBundle\Entity\User;
 
 /**
@@ -77,8 +77,10 @@ class Contract
      */
     protected $user;
 
+
     /**
-     *
+     * Contract constructor.
+     * @param User $user
      */
     public function __construct(User $user)
     {

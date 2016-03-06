@@ -16,3 +16,4 @@
 composer.lock
 # NFS share ghost files
 ._*
+/.idea

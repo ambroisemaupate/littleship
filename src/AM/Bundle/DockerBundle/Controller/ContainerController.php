@@ -29,10 +29,10 @@ use AM\Bundle\DockerBundle\Docker\ContainerInfos;
 use AM\Bundle\DockerBundle\Entity\Container as ContainerEntity;
 use AM\Bundle\DockerBundle\Form\ContainerEntityType;
 use AM\Bundle\DockerBundle\Form\ContainerType;
-use Docker\API\Model\Container;
+
 use Docker\API\Model\ContainerConfig;
-use Docker\API\Model\HostConfig;
-use Docker\API\Model\RestartPolicy;
+
+
 use GuzzleHttp\Exception\RequestException;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -127,36 +127,12 @@ class ContainerController extends Controller
 
             if ($form->isSubmitted() && $form->isValid()) {
                 $data = $form->getData();
+                $containerConfig = ContainerInfos::getContainerConfigFromData($data);
 
-                $containerConfig = new ContainerConfig();
-
-                $restartPolicy = new RestartPolicy();
-                $restartPolicy->setName($data['restart_policy']);
-                $restartPolicy->setMaximumRetryCount(0);
-
-                $hostConfig = new HostConfig();
-                $hostConfig->setPublishAllPorts((boolean) $data['publish_ports']);
-                $hostConfig->setRestartPolicy($restartPolicy);
-                if (isset($data['links']) && count($data['links']) > 0) {
-                    $hostConfig->setLinks($data['links']);
-                }
-                if (isset($data['volumes_from']) && count($data['volumes_from']) > 0) {
-                    $hostConfig->setVolumesFrom($data['volumes_from']);
-                }
-                $containerConfig->setExposedPorts($this->getExposedPorts($data['ports']));
-                $containerConfig->setImage($data['image']);
-                $containerConfig->setNames([$data['name']]);
-                $containerConfig->setHostConfig($hostConfig);
-                $containerConfig->setAttachStdin(false);
-                $containerConfig->setAttachStdout(false);
-                $containerConfig->setAttachStderr(false);
-
-                // Test if env is set and not empty before setting it
-                if (isset($data['env']) && count($data['env']) > 0) {
-                    $containerConfig->setEnv($data['env']);
-                }
                 try {
-                    $containerCreateResult = $cManager->create($containerConfig);
+                    $containerCreateResult = $cManager->create($containerConfig, [
+                        'name' => $data['name']
+                    ]);
                     $cManager->start($containerCreateResult->getId());
                     $this->get('logger')->info('New container created and started.', [
                         'id' => $containerCreateResult->getId(),
@@ -164,7 +140,7 @@ class ContainerController extends Controller
                     ]);
                     return $this->redirect($this->generateUrl('am_docker_container_list'));
                 } catch (\Http\Client\Plugin\Exception\ServerErrorException $e) {
-                    $form->addError(new FormError($e->getMessage()));
+                    $form->addError(new FormError($e->getResponse()->getBody()->getContents()));
                 }
             }
 
@@ -174,15 +150,6 @@ class ContainerController extends Controller
         }
 
         return $this->render('AMDockerBundle:Container:add.html.twig', $assignation);
-    }
-
-    protected function getExposedPorts(array &$ports)
-    {
-        $exposedPorts = [];
-        foreach ($ports as $port) {
-            $exposedPorts[$port] = [];
-        }
-        return new \ArrayObject($exposedPorts);
     }
 
     public function startAction($id)

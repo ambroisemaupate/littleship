@@ -63,7 +63,11 @@ class AvailableLinksType extends AbstractType
         }
 
         $resolver->setDefaults(array(
-            'choices' => $options
+            'choices' => $options,
+            'label' => 'Link container to:',
+            'placeholder' => 'None',
+            'multiple' => true,
+            'required'  => false,
         ));
     }
 

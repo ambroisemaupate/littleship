@@ -47,13 +47,15 @@ class AvailableImagesType extends AbstractType
         $options = [];
 
         foreach ($images as $image) {
-            $tags = implode('', $image->getRepoTags());
-
+            $tags = $image->getRepoTags()[0];
             $options[$tags] = $tags;
         }
 
         $resolver->setDefaults(array(
-            'choices' => $options
+            'choices' => $options,
+            'label' => 'Run from image:',
+            'placeholder' => 'Choose an image',
+            'required'  => true,
         ));
     }
 

@@ -74,16 +74,27 @@
             </table>
         </div>
     </div>
+    {% if container.mounts is defined and container.mounts|length > 0 %}
     <div class="col-md-12">
         <div class="panel panel-default volumes">
             <div class="panel-heading"><h3 class="panel-title">{% trans %}Volumes{% endtrans %}</h3></div>
             <table class="table">
-                {% for intern, extern in container.mounts %}
-                <tr><td>{{ intern }}</td><td>{{ extern }}</td></tr>
+                    <tr>
+                        <th>{% trans %}Source{% endtrans %}</th>
+                        <th>{% trans %}Destination{% endtrans %}</th>
+                        <th>{% trans %}RW{% endtrans %}</th>
+                    </tr>
+                {% for mount in container.mounts %}
+                    <tr>
+                        <td>{{ mount.source }}</td>
+                        <td>{{ mount.destination }}</td>
+                        <td>{{ mount.rW }}</td>
+                    </tr>
                 {% endfor %}
             </table>
         </div>
     </div>
+    {% endif %}
 
     {% if linkedContainers is defined %}
     <div class="col-md-4">

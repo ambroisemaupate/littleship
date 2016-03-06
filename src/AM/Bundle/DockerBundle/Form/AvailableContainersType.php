@@ -54,7 +54,11 @@ class AvailableContainersType extends AbstractType
         }
 
         $resolver->setDefaults(array(
-            'choices' => $options
+            'choices' => $options,
+            'label' => 'Use volumes from:',
+            'placeholder' => 'None',
+            'multiple' => true,
+            'required'  => false,
         ));
     }
 

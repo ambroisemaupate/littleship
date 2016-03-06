@@ -13,6 +13,9 @@
     </div>
     <h1>{{ '%username%’s containers'|trans({'%username%': user.username}) }}</h1>
 </div>
+{% if error is defined %}
+    <div class="alert alert-danger" role="alert"><i class="fa fa-exclamation-triangle"></i> {{ error }}</div>
+{% endif %}
 
 {% if containers is defined %}
     <table class="table table-striped">
@@ -20,51 +23,53 @@
             <tr>
                 <th>{% trans %}Name{% endtrans %}</th>
                 <th class="hidden-xs">{% trans %}Image{% endtrans %}</th>
+                <th class="hidden-xs">{% trans %}Created{% endtrans %}</th>
                 <th class="hidden-xs">{% trans %}Ports{% endtrans %}</th>
+                <th class="hidden-xs">{% trans %}Status{% endtrans %}</th>
             </tr>
         </thead>
         <tbody>
-            {% for key, container in containers %}
-            {% if container is not null %}
-                {% if container.runtimeInformations.State.Running %}
+        {% for container in containers %}
+            {% if container.state.Running %}
                 {% set status = 'running' %}
-                {% elseif container.runtimeInformations.State.Paused %}
-                {% set status = 'paused' %}
-                {% elseif container.runtimeInformations.State.Dead %}
-                {% set status = 'dead' %}
-                {% else %}
+            {% elseif not container.state.Running %}
                 {% set status = 'exited' %}
-                {% endif %}
-
-                {% set containerEntity = containerEntities[key] %}
-                <tr class="{{ status }}">
-                    <td class="name">
-                        {% if status == 'running' %}
-                        <i class="glyphicon glyphicon-ok-circle"></i>
-                        {% elseif status == 'exited' %}
-                        <i class="glyphicon glyphicon-ban-circle"></i>
-                        {% elseif status == 'dead' %}
-                        <i class="glyphicon glyphicon-exclamation-sign"></i>
-                        {% endif %}
-
-                        {% if container.runtimeInformations.Name is defined %}
-                        <a href="{{ path('am_docker_container_details', {id:container.id}) }}">{{ container.runtimeInformations.Name }}</a>
-                        {% endif %}
-                    </td>
-                    <td class="image hidden-xs">{{ container.runtimeInformations.Config.Image }}</td>
-                    <td class="ports hidden-xs">
-                        {% for port, settings in container.runtimeInformations.NetworkSettings.Ports %}
-                        <p>
-                            <span class="private">{{ port }}</span>
-                            {% for setting in settings %}
-                            <span class="public">{{ setting.HostIp }}:{{ setting.HostPort }}</span>
-                            {% endfor %}
-                        </p>
-                        {% endfor %}
-                    </td>
-                </tr>
+            {% else %}
+                {% set status = 'dead' %}
             {% endif %}
-            {% endfor %}
+            <tr class="{{ status }}">
+                <td class="name">
+                    {% if container.state.Running %}
+                        <i class="glyphicon glyphicon-ok-circle"></i>
+                    {% elseif not container.state.Running %}
+                        <i class="glyphicon glyphicon-ban-circle"></i>
+                    {% else %}
+                        <i class="glyphicon glyphicon-exclamation-sign"></i>
+                    {% endif %}
+
+                    {% if container.name is defined %}
+                        <a href="{{ path('am_docker_container_details', {id:container.id}) }}">{{ container.name }}</a>
+                    {% endif %}
+                </td>
+                <td class="image hidden-xs">{{ container.image }}</td>
+                <td class="hidden-xs">{{ container.created }}</td>
+                <td class="ports hidden-xs">
+                    {% for port in container.config.ports %}
+                        <p>
+                            {% if port.PrivatePort is defined %}
+                                <span class="private">{{ port.PrivatePort }}</span>
+                            {% endif %}
+                            {% if port.PublicPort is defined %}
+                                <span class="public">{{ port.PublicPort }}</span>
+                            {% endif %}
+                        </p>
+                    {% endfor %}
+                </td>
+                <td class="status hidden-xs">
+                    {{ status|trans }}
+                </td>
+            </tr>
+        {% endfor %}
         </tbody>
     </table>
 {% else %}
