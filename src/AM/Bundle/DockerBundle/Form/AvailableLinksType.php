@@ -27,7 +27,7 @@ namespace AM\Bundle\DockerBundle\Form;
 
 use Docker\Manager\ContainerManager;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
  * AvailableContainersType.
@@ -41,7 +41,7 @@ class AvailableLinksType extends AbstractType
         $this->manager = $manager;
     }
 
-    public function setDefaultOptions(OptionsResolverInterface $resolver)
+    public function configureOptions(OptionsResolver $resolver)
     {
         $containers = $this->manager->findAll([
             'all' => true
@@ -49,8 +49,8 @@ class AvailableLinksType extends AbstractType
         $options = [];
 
         foreach ($containers as $container) {
-            $name = $container->getName() != "" ? $container->getName() : $container->getData()['Names'][0];
-            $imageName = $container->getData()['Image'];
+            $name = $container->getNames()[0];
+            $imageName = $container->getImage();
             $imageName = explode(':', $imageName);
             $repository = explode('/', $imageName[0]);
 

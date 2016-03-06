@@ -25,7 +25,7 @@
  */
 namespace AM\Bundle\DockerBundle\Docker;
 
-use Docker\Container;
+use Docker\API\Model\Container;
 use Docker\Manager\ContainerManager;
 
 /**
@@ -42,10 +42,10 @@ class ContainerInfos
 
     public function isRunning()
     {
-        if ($this->container->exists()) {
-            $data = $this->container->getRuntimeInformations();
-            if (isset($data['State']['Running'])) {
-                return $data['State']['Running'];
+        if ($this->container) {
+            $state = $this->container->getState();
+            if (null !== $state) {
+                return $state->getRunning();
             }
         }
 
@@ -54,53 +54,79 @@ class ContainerInfos
 
     public function getDetailsAssignation(ContainerManager $manager, array &$assignation)
     {
-        $manager->inspect($this->container);
         $assignation['container'] = $this->container;
-        $runtimeInformations = $this->container->getRuntimeInformations();
+        $state = $this->container->getState();
 
-        if (count($runtimeInformations['HostConfig']['Links']) > 0) {
-            $assignation['linkedContainers'] = $runtimeInformations['HostConfig']['Links'];
-        }
-        if (count($runtimeInformations['HostConfig']['VolumesFrom']) > 0) {
-            $assignation['volumesFromContainers'] = $runtimeInformations['HostConfig']['VolumesFrom'];
-        }
-        if (isset($runtimeInformations['HostConfig']['RestartPolicy'])) {
-            $assignation['restartPolicy'] = $runtimeInformations['HostConfig']['RestartPolicy'];
-        }
+        $this->getHostConfigAssignation($assignation);
 
-        if (isset($runtimeInformations['State']['FinishedAt'])) {
-            $date = explode('.', $runtimeInformations['State']['FinishedAt']);
+        if (false === $state->getRunning()) {
+            $date = explode('.', $state->getFinishedAt());
             if (count($date) > 1) {
                 $assignation['FinishedAt'] = new \DateTime($date[0] . 'Z');
             } else {
-                $assignation['FinishedAt'] = new \DateTime($runtimeInformations['State']['FinishedAt']);
+                $assignation['FinishedAt'] = new \DateTime($state->getFinishedAt());
             }
         }
-        if (isset($runtimeInformations['State']['StartedAt'])) {
-            $date = explode('.', $runtimeInformations['State']['StartedAt']);
+        if (true === $state->getRunning()) {
+            $date = explode('.', $state->getStartedAt());
             if (count($date) > 1) {
                 $assignation['StartedAt'] = new \DateTime($date[0] . 'Z');
             } else {
-                $assignation['StartedAt'] = new \DateTime($runtimeInformations['State']['StartedAt']);
+                $assignation['StartedAt'] = new \DateTime($state->getStartedAt());
             }
 
             $now = new \DateTime();
             $assignation['RunningAge'] = $now->diff($assignation['StartedAt'], true);
         }
-        if (isset($runtimeInformations['Created'])) {
-            $date = explode('.', $runtimeInformations['Created']);
-            if (count($date) > 1) {
-                $assignation['Created'] = new \DateTime($date[0] . 'Z');
-            } else {
-                $assignation['Created'] = new \DateTime($runtimeInformations['Created']);
-            }
 
-            $now = new \DateTime();
-            $assignation['Age'] = $now->diff($assignation['Created'], true);
+        $date = explode('.', $this->container->getCreated());
+        if (count($date) > 1) {
+            $assignation['Created'] = new \DateTime($date[0] . 'Z');
+        } else {
+            $assignation['Created'] = new \DateTime($this->container->getCreated());
         }
 
-        $assignation['logs'] =  $manager->logs($this->container, false, true, true, false, 100);
+        $now = new \DateTime();
+        $assignation['Age'] = $now->diff($assignation['Created'], true);
+        $assignation['image'] = $this->container->getConfig()->getImage();
+        $assignation['running'] = $state->getRunning();
+        $assignation['ports'] = $this->container->getConfig()->getExposedPorts();
+        $this->getLogsAssignation($manager, $assignation);
 
         return $assignation;
+    }
+    /**
+     * @param  array  &$assignation [description]
+     */
+    protected function getHostConfigAssignation(array &$assignation)
+    {
+        $hostConfig = $this->container->getHostConfig();
+
+        if (null !== $hostConfig) {
+            if (count($hostConfig->getLinks()) > 0) {
+                $assignation['linkedContainers'] = $hostConfig->getLinks();
+            }
+            if (count($hostConfig->getVolumesFrom()) > 0) {
+                $assignation['volumesFromContainers'] = $hostConfig->getVolumesFrom();
+            }
+            $assignation['restartPolicy'] = $hostConfig->getRestartPolicy();
+        }
+    }
+
+    /**
+     *
+     * @param  ContainerManager $manager      [description]
+     * @param  array            &$assignation [description]
+     */
+    protected function getLogsAssignation(ContainerManager $manager, array &$assignation)
+    {
+        try {
+            $assignation['logs'] =  $manager->logs($this->container->getId(), [
+                'tail' => '100',
+                'timestamps' => true,
+            ]);
+        } catch (\Http\Client\Plugin\Exception\ClientErrorException $e) {
+            $assignation['logs'] = [$e->getMessage()];
+        }
     }
 }

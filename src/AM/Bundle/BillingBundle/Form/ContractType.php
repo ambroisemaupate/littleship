@@ -5,7 +5,7 @@ namespace AM\Bundle\BillingBundle\Form;
 use AM\Bundle\BillingBundle\Entity\Contract;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ContractType extends AbstractType
 {
@@ -35,9 +35,9 @@ class ContractType extends AbstractType
     }
 
     /**
-     * @param OptionsResolverInterface $resolver
+     * @param OptionsResolver $resolver
      */
-    public function setDefaultOptions(OptionsResolverInterface $resolver)
+    public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
             'data_class' => 'AM\Bundle\BillingBundle\Entity\Contract'

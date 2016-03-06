@@ -15,13 +15,19 @@
     <thead>
         <tr>
             <th>{% trans %}Repository{% endtrans %}</th>
-            <th>{% trans %}Tag{% endtrans %}</th>
+            <th>{% trans %}Size{% endtrans %}</th>
         </tr>
     </thead>
     {% for image in images %}
     <tr class="image">
-        <td class="repository">{{ image.repository }}</td>
-        <td class="tag">{{ image.tag }}</td>
+        <td class="repository">
+            {% for tag in image.repoTags %}
+                {{ tag }}
+            {% endfor %}
+        </td>
+        <td class="size">
+            {{ image.size }}
+        </td>
     </tr>
     {% endfor %}
 </table>

@@ -33,11 +33,11 @@
         </thead>
         <tbody>
             {% for container in containers %}
-            {% if 'Up' in container.data.Status %}
+            {% if 'Up' in container.status %}
             {% set status = 'running' %}
-            {% elseif 'Exited' in container.data.Status %}
+            {% elseif 'Exited' in container.status %}
             {% set status = 'exited' %}
-            {% elseif 'Dead' in container.data.Status %}
+            {% elseif 'Dead' in container.status %}
             {% set status = 'dead' %}
             {% else %}
             {% set status = '' %}
@@ -45,22 +45,22 @@
 
             <tr class="{{ status }}">
                 <td class="name">
-                    {% if 'Up' in container.data.Status %}
+                    {% if 'Up' in container.status %}
                     <i class="glyphicon glyphicon-ok-circle"></i>
-                    {% elseif 'Exited' in container.data.Status %}
+                    {% elseif 'Exited' in container.status %}
                     <i class="glyphicon glyphicon-ban-circle"></i>
-                    {% elseif 'Dead' in container.data.Status %}
+                    {% elseif 'Dead' in container.status %}
                     <i class="glyphicon glyphicon-exclamation-sign"></i>
                     {% endif %}
 
-                    {% if container.data.Names[0] is defined %}
-                    <a href="{{ path('am_docker_container_details', {id:container.id}) }}">{{ container.data.Names[0] }}</a>
+                    {% if container.names[0] is defined %}
+                    <a href="{{ path('am_docker_container_details', {id:container.id}) }}">{{ container.names[0] }}</a>
                     {% endif %}
                 </td>
-                <td class="image hidden-xs">{{ container.config.Image }}</td>
-                <td class="hidden-xs">{{ container.data.Created|localizeddate('short', 'short') }}</td>
+                <td class="image hidden-xs">{{ container.image }}</td>
+                <td class="hidden-xs">{{ container.created|localizeddate('short', 'short') }}</td>
                 <td class="ports hidden-xs">
-                    {% for port in container.data.Ports %}
+                    {% for port in container.ports %}
                     <p>
                         {% if port.PrivatePort is defined %}
                         <span class="private">{{ port.PrivatePort }}</span>
@@ -72,7 +72,7 @@
                     {% endfor %}
                 </td>
                 <td class="status hidden-xs">
-                {{ container.data.Status }}
+                {{ container.status }}
                 </td>
             </tr>
             {% endfor %}

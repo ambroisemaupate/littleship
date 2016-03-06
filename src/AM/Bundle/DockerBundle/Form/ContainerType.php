@@ -28,7 +28,6 @@ namespace AM\Bundle\DockerBundle\Form;
 use Docker\Manager\ImageManager;
 use Docker\Manager\ContainerManager;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 use Symfony\Component\Form\FormBuilderInterface;
 
 /**
@@ -53,7 +52,7 @@ class ContainerType extends AbstractType
         ])
         ->add('image', new AvailableImagesType($this->imageManager), [
             'label' => 'Run from image:',
-            'empty_value' => 'Choose an image',
+            'placeholder' => 'Choose an image',
             'required'  => true,
         ])
         ->add('env', 'collection', [
@@ -86,19 +85,19 @@ class ContainerType extends AbstractType
         ])
         ->add('volumes_from', new AvailableContainersType($this->containerManager), [
             'label' => 'Use volumes from:',
-            'empty_value' => 'None',
+            'placeholder' => 'None',
             'multiple' => true,
             'required'  => false,
         ])
         ->add('links', new AvailableLinksType($this->containerManager), [
             'label' => 'Link container to:',
-            'empty_value' => 'None',
+            'placeholder' => 'None',
             'multiple' => true,
             'required'  => false,
         ])
         ->add('restart_policy', 'choice', [
             'label' => 'Restart policy:',
-            'empty_value' => '-- Choose a restart policy --',
+            'placeholder' => '-- Choose a restart policy --',
             'choices' => [
                 'no' => 'Do not automatically restart the container',
                 'on-failure' => 'Restart only if the container exits with a non-zero exit status',

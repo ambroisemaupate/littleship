@@ -27,7 +27,7 @@ namespace AM\Bundle\DockerBundle\Form;
 
 use Docker\Manager\ImageManager;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
  * AvailableImagesType.
@@ -41,13 +41,15 @@ class AvailableImagesType extends AbstractType
         $this->manager = $manager;
     }
 
-    public function setDefaultOptions(OptionsResolverInterface $resolver)
+    public function configureOptions(OptionsResolver $resolver)
     {
         $images = $this->manager->findAll();
         $options = [];
 
         foreach ($images as $image) {
-            $options[$image->getRepository() . ':' . $image->getTag()] = $image->getRepository() . ':' . $image->getTag();
+            $tags = implode('', $image->getRepoTags());
+
+            $options[$tags] = $tags;
         }
 
         $resolver->setDefaults(array(
