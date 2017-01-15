@@ -30,6 +30,7 @@ use Docker\API\Model\ContainerConfig;
 use Docker\API\Model\HostConfig;
 use Docker\API\Model\RestartPolicy;
 use Docker\Manager\ContainerManager;
+use Http\Client\Common\Exception\ClientErrorException;
 
 /**
  * Docker container wrapper class
@@ -38,11 +39,18 @@ class ContainerInfos
 {
     protected $container;
 
+    /**
+     * ContainerInfos constructor.
+     * @param Container $container
+     */
     public function __construct(Container $container)
     {
         $this->container = $container;
     }
 
+    /**
+     * @return bool
+     */
     public function isRunning()
     {
         if ($this->container) {
@@ -106,6 +114,11 @@ class ContainerInfos
         return new \ArrayObject($exposedPorts);
     }
 
+    /**
+     * @param ContainerManager $manager
+     * @param array $assignation
+     * @return array
+     */
     public function getDetailsAssignation(ContainerManager $manager, array &$assignation)
     {
         $assignation['container'] = $this->container;
@@ -150,7 +163,8 @@ class ContainerInfos
         } else {
             $assignation['ports'] = $this->container->getHostConfig()->getPortBindings();
         }
-        $this->getLogsAssignation($manager, $assignation);
+
+        //$this->getLogsAssignation($manager, $assignation);
 
         return $assignation;
     }
@@ -185,7 +199,7 @@ class ContainerInfos
                 'stderr' => true,
                 'timestamps' => true,
             ]);
-        } catch (\Http\Client\Plugin\Exception\ClientErrorException $e) {
+        } catch (ClientErrorException $e) {
             $assignation['logs'] = [$e->getResponse()->getBody()->getContents()];
         }
     }

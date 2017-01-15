@@ -27,22 +27,30 @@ namespace AM\Bundle\DockerBundle\Controller;
 
 use AM\Bundle\DockerBundle\Docker\ContainerInfos;
 use AM\Bundle\DockerBundle\Entity\Container as ContainerEntity;
+use AM\Bundle\DockerBundle\Entity\Container;
 use AM\Bundle\DockerBundle\Form\ContainerEntityType;
 use AM\Bundle\DockerBundle\Form\ContainerType;
-
-use Docker\API\Model\ContainerConfig;
-
-
-use GuzzleHttp\Exception\RequestException;
+use AM\Bundle\UserBundle\Entity\User;
+use Docker\Manager\ContainerManager;
+use Docker\Manager\ImageManager;
+use Doctrine\ORM\EntityManager;
+use Http\Client\Common\Exception\ServerErrorException;
+use Http\Client\Exception\RequestException;
+use Http\Client\Plugin\Exception\ClientErrorException;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Form\FormError;
+use Symfony\Component\HttpFoundation\Request;
+
 
 /**
  * Description.
  */
 class ContainerController extends Controller
 {
+
+    /**
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
     public function listAction()
     {
         if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
@@ -52,6 +60,7 @@ class ContainerController extends Controller
         $assignation = [];
         try {
             $docker = $this->get('docker');
+            /** @var ContainerManager $manager */
             $manager = $docker->getContainerManager();
             $assignation['containers'] = $manager->findAll();
         } catch (RequestException $e) {
@@ -60,6 +69,10 @@ class ContainerController extends Controller
 
         return $this->render('AMDockerBundle:Container:list.html.twig', $assignation);
     }
+
+    /**
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
     public function listAllAction()
     {
         if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
@@ -69,6 +82,7 @@ class ContainerController extends Controller
 
         try {
             $docker = $this->get('docker');
+            /** @var ContainerManager $manager */
             $manager = $docker->getContainerManager();
             $assignation['containers'] = $manager->findAll([
                 'all' => true,
@@ -80,36 +94,57 @@ class ContainerController extends Controller
         return $this->render('AMDockerBundle:Container:list.html.twig', $assignation);
     }
 
+    /**
+     * @param $id
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
     public function detailsAction($id)
     {
         if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
             throw $this->createAccessDeniedException();
         }
 
-        $docker = $this->get('docker');
-        $manager = $docker->getContainerManager();
-        $container = $manager->find($id);
+        /** @var EntityManager $em */
+        $em = $this->get('doctrine')->getManager();
+        /** @var Container $containerEntity */
+        $containerEntity = $em->getRepository('AM\Bundle\DockerBundle\Entity\Container')
+            ->findOneByContainerId($id);
+
         $assignation = [];
 
-        if (null !== $container) {
-            $em = $this->get('doctrine')->getManager();
-            $containerEntity = $em->getRepository('AM\Bundle\DockerBundle\Entity\Container')
-                ->findOneByContainerId($id);
+        if (null !== $containerEntity) {
+            $assignation['containerEntity'] = $containerEntity;
+        }
 
-            if (null !== $containerEntity) {
-                $assignation['containerEntity'] = $containerEntity;
-            }
+        try {
+            $docker = $this->get('docker');
+            /** @var ContainerManager $manager */
+            $manager = $docker->getContainerManager();
+            $container = $manager->find($id);
 
             $containerInfos = new ContainerInfos($container);
             $containerInfos->getDetailsAssignation($manager, $assignation);
+        } catch (ClientErrorException $e) {
+            if (null === $containerEntity) {
+                throw $this->createNotFoundException();
+            }
+            $assignation['container'] = [
+                'id' => $containerEntity->getContainerId(),
+                'name' => $containerEntity->getName(),
+            ];
+            $assignation['running'] = false;
+            $assignation['image'] = null;
+            $assignation['error'] = $e->getMessage();
 
-            return $this->render('AMDockerBundle:Container:details.html.twig', $assignation);
-
-        } else {
-            throw $this->createNotFoundException();
         }
+
+        return $this->render('AMDockerBundle:Container:details.html.twig', $assignation);
     }
 
+    /**
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     */
     public function addAction(Request $request)
     {
         if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
@@ -118,7 +153,10 @@ class ContainerController extends Controller
 
         try {
             $docker = $this->get('docker');
+            /** @var ContainerManager $cManager */
             $cManager = $docker->getContainerManager();
+
+            /** @var ImageManager $iManager */
             $iManager = $docker->getImageManager();
 
             $form = $this->createForm(new ContainerType($iManager, $cManager));
@@ -139,7 +177,7 @@ class ContainerController extends Controller
                         'name' => $containerConfig->getNames()[0],
                     ]);
                     return $this->redirect($this->generateUrl('am_docker_container_list'));
-                } catch (\Http\Client\Plugin\Exception\ServerErrorException $e) {
+                } catch (ServerErrorException $e) {
                     $form->addError(new FormError($e->getResponse()->getBody()->getContents()));
                 }
             }
@@ -179,6 +217,10 @@ class ContainerController extends Controller
         }
     }
 
+    /**
+     * @param $id
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
     public function stopAction($id)
     {
         if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
@@ -233,6 +275,11 @@ class ContainerController extends Controller
         }
     }
 
+    /**
+     * @param Request $request
+     * @param $id
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     */
     public function removeAction(Request $request, $id)
     {
         if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
@@ -285,6 +332,11 @@ class ContainerController extends Controller
         }
     }
 
+    /**
+     * @param Request $request
+     * @param $id
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     */
     public function syncAction(Request $request, $id)
     {
         if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
@@ -325,6 +377,8 @@ class ContainerController extends Controller
         if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
             throw $this->createAccessDeniedException();
         }
+
+        /** @var EntityManager $em */
         $em = $this->get('doctrine')->getManager();
         $containerEntity = $em->find('AM\Bundle\DockerBundle\Entity\Container', $id);
 
@@ -335,14 +389,9 @@ class ContainerController extends Controller
             throw $this->createNotFoundException();
         }
 
-        $docker = $this->get('docker');
-        $manager = $docker->getContainerManager();
-        $container = $manager->find($containerEntity->getContainerId());
-        $assignation['container'] = $container;
-
-        if (null === $container) {
-            throw $this->createNotFoundException();
-        }
+        /** @var User $user */
+        $user = $containerEntity->getUser();
+        $assignation['containerEntity'] = $containerEntity;
 
         $form = $this->createFormBuilder()
             ->add('submit', 'submit', [
@@ -357,7 +406,7 @@ class ContainerController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $em->remove($containerEntity);
             $em->flush();
-            return $this->redirect($this->generateUrl('am_docker_container_details', ['id' => $containerEntity->getContainerId()]));
+            return $this->redirect($this->generateUrl('am_user_edit', ['id' => $user->getId()]));
         }
 
         $assignation['form'] = $form->createView();

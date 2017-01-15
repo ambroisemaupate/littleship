@@ -25,6 +25,7 @@
  */
 namespace AM\Bundle\DockerBundle\Controller;
 
+use Docker\Manager\ImageManager;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use GuzzleHttp\Exception\RequestException;
 use Symfony\Component\HttpFoundation\Request;
@@ -79,11 +80,14 @@ class ImageController extends Controller
         if ($form->isValid()) {
             try {
                 $docker = $this->get('docker');
+                /** @var ImageManager $imageManager */
                 $imageManager = $docker->getImageManager();
-                $json = $imageManager->search($form->getData()['search']);
+                $json = $imageManager->search([
+                    'term' => $form->get('search')->getData(),
+                ]);
                 $assignation['json'] = $json;
 
-            } catch (RequestException $e) {
+            } catch (\Http\Client\Exception\RequestException $e) {
                 $assignation['error'] = $e->getMessage();
             }
         } else {
@@ -91,24 +95,5 @@ class ImageController extends Controller
         }
 
         return $this->render('AMDockerBundle:Image:search.html.twig', $assignation);
-    }
-
-    public function pullAction($name)
-    {
-        if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
-            throw $this->createAccessDeniedException();
-        }
-
-        try {
-            $docker = $this->get('docker');
-            $imageManager = $docker->getImageManager();
-            $imageManager->pull(urldecode($name));
-
-            return $this->redirectToRoute('am_docker_images');
-
-        } catch (\Exception $e) {
-            $assignation['error'] = $e->getMessage();
-            throw $this->createNotFoundException($e->getMessage());
-        }
     }
 }

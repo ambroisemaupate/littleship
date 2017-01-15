@@ -27,7 +27,6 @@ namespace AM\Bundle\DockerBundle\Controller;
 
 use AM\Bundle\DockerBundle\Docker\ContainerInfos;
 use Docker\Container;
-use GuzzleHttp\Exception\RequestException;
 use Http\Client\Plugin\Exception\ClientErrorException;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
@@ -58,6 +57,10 @@ class UserContainerController extends Controller
         return $this->render('AMDockerBundle:UserContainer:list.html.twig', $assignation);
     }
 
+    /**
+     * @param $username
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
     public function listForUsernameAction($username)
     {
         if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
@@ -84,13 +87,17 @@ class UserContainerController extends Controller
                 $assignation['containers'][] = $manager->find($container->getContainerId());
             }
 
-        } catch (RequestException $e) {
+        } catch (ClientErrorException $e) {
             $assignation['error'] = $e->getMessage();
         }
 
         return $this->render('AMDockerBundle:UserContainer:listForUsername.html.twig', $assignation);
     }
 
+    /**
+     * @param $id
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
     public function detailsAction($id)
     {
         if (!$this->isGranted('ROLE_USER')) {

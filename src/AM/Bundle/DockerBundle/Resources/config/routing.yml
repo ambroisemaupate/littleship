@@ -1,65 +1,23 @@
 am_docker_homepage:
     path:     /
     defaults: { _controller: AMDockerBundle:Default:index }
+
+
 am_docker_container_list:
     path:     /containers
     defaults: { _controller: AMDockerBundle:Container:list }
-am_docker_container_listall:
-    path:     /containers/all
-    defaults: { _controller: AMDockerBundle:Container:listAll }
-am_docker_container_add:
-    path:     /containers/create
-    defaults: { _controller: AMDockerBundle:Container:add }
-am_docker_container_details:
-    path:     /container/{id}
-    defaults: { _controller: AMDockerBundle:Container:details }
-am_docker_container_start:
-    path:     /container/start/{id}
-    defaults: { _controller: AMDockerBundle:Container:start }
-am_docker_container_stop:
-    path:     /container/stop/{id}
-    defaults: { _controller: AMDockerBundle:Container:stop }
-am_docker_container_restart:
-    path:     /container/restart/{id}
-    defaults: { _controller: AMDockerBundle:Container:restart }
-am_docker_container_remove:
-    path:     /container/remove/{id}
-    defaults: { _controller: AMDockerBundle:Container:remove }
-am_docker_container_sync:
-    path:     /container/sync/{id}
-    defaults: { _controller: AMDockerBundle:Container:sync }
-am_docker_container_unsync:
-    path:     /container/unsync/{id}
-    defaults: { _controller: AMDockerBundle:Container:unsync }
+am_docker_container_routes:
+    resource: "@AMDockerBundle/Resources/config/containers_routing.yml"
+    prefix:   /containers
+
 
 am_docker_usercontainer_list:
     path:     /user-containers
     defaults: { _controller: AMDockerBundle:UserContainer:list }
-am_docker_usercontainer_listforusername:
-    path:     /user-containers/{username}
-    defaults: { _controller: AMDockerBundle:UserContainer:listForUsername }
-    requirements:
-        username: "[0-9a-zA-Z_\-\.]+"
-am_docker_usercontainer_details:
-    path:     /user-container/{id}
-    defaults: { _controller: AMDockerBundle:UserContainer:details }
-    requirements:
-        id: "[0-9]+"
-am_docker_usercontainer_start:
-    path:     /user-container/start/{id}
-    defaults: { _controller: AMDockerBundle:UserContainer:start }
-    requirements:
-        id: "[0-9]+"
-am_docker_usercontainer_stop:
-    path:     /user-container/stop/{id}
-    defaults: { _controller: AMDockerBundle:UserContainer:stop }
-    requirements:
-        id: "[0-9]+"
-am_docker_usercontainer_restart:
-    path:     /user-container/restart/{id}
-    defaults: { _controller: AMDockerBundle:UserContainer:restart }
-    requirements:
-        id: "[0-9]+"
+am_docker_usercontainer_routes:
+    resource: "@AMDockerBundle/Resources/config/usercontainer_routing.yml"
+    prefix:   /user-containers
+
 
 
 am_docker_images:
@@ -68,8 +26,3 @@ am_docker_images:
 am_docker_images_search:
     path:     /images/search
     defaults: { _controller: AMDockerBundle:Image:search}
-am_docker_image_pull:
-    path:     /images/pull/{name}
-    defaults: { _controller: AMDockerBundle:Image:pull}
-    requirements:
-        name: "[a-zA-Z0-9_\-\%]+"

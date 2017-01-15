@@ -9,7 +9,7 @@
 </div>
 {% if form is defined %}
     <div class="simple-confirmation-form">
-        <a class="btn btn-default" href="{{ path('am_docker_container_details', {'id':container.id}) }}">{% trans %}Cancel{% endtrans %}</a>
+        <a class="btn btn-default" href="{{ path('am_docker_container_details', {'id':containerEntity.containerId}) }}">{% trans %}Cancel{% endtrans %}</a>
         {% form_theme form 'bootstrap_3_layout.html.twig' %}
         {{ form(form) }}
     </div>

@@ -16,21 +16,20 @@
             <th>{% trans %}Repository{% endtrans %}</th>
             <th>{% trans %}Description{% endtrans %}</th>
             <th>{% trans %}Stars{% endtrans %}</th>
-            <th></th>
+            {#<th></th>#}
         </tr>
     </thead>
     {% for image in json %}
     <tr class="image">
         <td class="repository">
-            {% if image.is_official %}<i title="{% trans %}Official{% endtrans %}" class="glyphicon glyphicon-star"></i> {% endif %}
-            {% if image.is_trusted %}<i title="{% trans %}Trusted{% endtrans %}" class="glyphicon glyphicon-ok"></i> {% endif %}
+            {% if image.isOfficial %}<i title="{% trans %}Official{% endtrans %}" class="glyphicon glyphicon-star"></i> {% endif %}
             {{ image.name }}
         </td>
         <td class="description">{{ image.description }}</td>
-        <td class="star_count">{{ image.star_count }} <i class="glyphicon glyphicon-star-empty"></i></td>
-        <td class="actions">
+        <td class="star_count">{{ image.starCount }} <i class="glyphicon glyphicon-star-empty"></i></td>
+        {#<td class="actions">
             <a href="{{ path('am_docker_image_pull', {name:image.name|url_encode}) }}" class="btn btn-primary"><i class="glyphicon glyphicon-circle-arrow-down"></i> {% trans %}Pull{% endtrans %}</a>
-        </td>
+        </td>#}
     </tr>
     {% endfor %}
 </table>

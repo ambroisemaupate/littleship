@@ -19,4 +19,8 @@ parameters:
 
     # A secret key that's used to generate certain security-related tokens
     secret:            ThisTokenIsNotSoSecretChangeIt
+
+    # Docker API configuration
     docker_entrypoint: "unix:///var/run/docker.sock"
+    docker_ssl: false
+    docker_cert_path: ""

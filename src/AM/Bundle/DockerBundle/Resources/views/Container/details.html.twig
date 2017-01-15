@@ -26,53 +26,67 @@
 </div>
 <section class="row container-details">
     <div class="col-md-12">
+        {% if error is defined %}
+            <p class="alert alert-danger">
+                <i class="fa fa-warning"></i> {{ error }}
+            </p>
+        {% endif %}
         <div class="panel panel-default state">
             <div class="panel-heading"><h3 class="panel-title">{% trans %}State{% endtrans %}</h3></div>
             <table class="table">
-                <tr>
-                    <td>{% trans %}CreatedAt{% endtrans %}</td>
-                    <td>{{ Created|localizeddate('full', 'medium') }} — {{ Age.format('%a day(s), %h hour(s), %i minute(s)'|trans) }}</td>
-                </tr>
+                {% if Created is defined and Age is defined %}
+                    <tr>
+                        <td>{% trans %}CreatedAt{% endtrans %}</td>
+                        <td>{{ Created|localizeddate('full', 'medium') }} — {{ Age.format('%a day(s), %h hour(s), %i minute(s)'|trans) }}</td>
+                    </tr>
+                {% endif %}
                 {% if running %}
-                <tr>
-                    <td>{% trans %}Running{% endtrans %}</td>
-                    <td><i class="glyphicon glyphicon-ok"></i> {{ RunningAge.format('%a day(s), %h hour(s), %i minute(s)'|trans) }}</td>
-                </tr>
-                <tr>
-                    <td>{% trans %}StartedAt{% endtrans %}</td>
-                    <td>{{ StartedAt|localizeddate('full', 'medium') }}</td>
-                </tr>
+                    {% if RunningAge is defined %}
+                        <tr>
+                            <td>{% trans %}Running{% endtrans %}</td>
+                            <td><i class="glyphicon glyphicon-ok"></i> {{ RunningAge.format('%a day(s), %h hour(s), %i minute(s)'|trans) }}</td>
+                        </tr>
+                    {% endif %}
+                    {% if StartedAt is defined %}
+                        <tr>
+                            <td>{% trans %}StartedAt{% endtrans %}</td>
+                            <td>{{ StartedAt|localizeddate('full', 'medium') }}</td>
+                        </tr>
+                    {% endif %}
                 {% else %}
-                <tr>
-                    <td>{% trans %}Running{% endtrans %}</td>
-                    <td><i class="glyphicon glyphicon-remove"></i></td>
-                </tr>
-                <tr>
-                    <td>{% trans %}FinishedAt{% endtrans %}</td>
-                    <td>{{ FinishedAt|localizeddate('full', 'medium') }}</td>
-                </tr>
+                    <tr>
+                        <td>{% trans %}Running{% endtrans %}</td>
+                        <td><i class="glyphicon glyphicon-remove"></i></td>
+                    </tr>
+                    {% if FinishedAt is defined %}
+                        <tr>
+                            <td>{% trans %}FinishedAt{% endtrans %}</td>
+                            <td>{{ FinishedAt|localizeddate('full', 'medium') }}</td>
+                        </tr>
+                    {% endif %}
                 {% endif %}
-
-                {% if container.state.oOMKilled %}
-                <tr>
-                    <td>{% trans %}oOMKilled{% endtrans %}</td>
-                    <td><i class="glyphicon glyphicon-ok"></i></td>
-                </tr>
+                {% if container.state is defined and container.state.oOMKilled %}
+                    <tr>
+                        <td>{% trans %}oOMKilled{% endtrans %}</td>
+                        <td><i class="glyphicon glyphicon-ok"></i></td>
+                    </tr>
                 {% endif %}
             </table>
         </div>
-        <div class="panel panel-default env">
-            <div class="panel-heading"><h3 class="panel-title">{% trans %}Environment variables{% endtrans %}</h3></div>
-            <table class="table">
-                {% for envVar in container.config.env %}
-                {% set envVarArray = envVar|split('=') %}
-                <tr>
-                    <td class="env-name">{{ envVarArray[0] }}</td>
-                    {% if envVarArray[1] is defined %}<td class="env-var">{{ envVarArray[1] }}</td>{% endif %}
-                </tr>
-                {% endfor %}
-            </table>
-        </div>
+        {% if container.config is defined %}
+            <div class="panel panel-default env">
+                <div class="panel-heading"><h3 class="panel-title">{% trans %}Environment variables{% endtrans %}</h3></div>
+                <table class="table">
+                    {% for envVar in container.config.env %}
+                        {% set envVarArray = envVar|split('=') %}
+                        <tr>
+                            <td class="env-name">{{ envVarArray[0] }}</td>
+                            {% if envVarArray[1] is defined %}<td class="env-var">{{ envVarArray[1] }}</td>{% endif %}
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        {% endif %}
     </div>
     {% if container.mounts is defined and container.mounts|length > 0 %}
     <div class="col-md-12">
@@ -125,7 +139,7 @@
     </div>
     {% endif %}
 
-    {% if ports|length > 0 %}
+    {% if ports is defined and ports|length > 0 %}
     <div class="col-md-4">
         <div class="panel panel-default ports">
             <div class="panel-heading"><h3 class="panel-title">{% trans %}Ports{% endtrans %}</h3></div>
@@ -143,21 +157,21 @@
         </div>
     </div>
     {% endif %}
-    {% if restartPolicy.Name %}
-    <div class="col-md-4">
-        <div class="panel panel-default restart-policy">
-            <div class="panel-heading"><h3 class="panel-title">{% trans %}Restart policy{% endtrans %}</h3></div>
-            <table class="table">
-                <tr>
-                    <td colspan="2"><strong>{{ restartPolicy.Name }}</strong></td>
-                </tr>
-                <tr>
-                    <td>{% trans %}MaximumRetryCount{% endtrans %}</td>
-                    <td>{{ restartPolicy.MaximumRetryCount }}</td>
-                </tr>
-            </table>
+    {% if restartPolicy is defined and restartPolicy.Name %}
+        <div class="col-md-4">
+            <div class="panel panel-default restart-policy">
+                <div class="panel-heading"><h3 class="panel-title">{% trans %}Restart policy{% endtrans %}</h3></div>
+                <table class="table">
+                    <tr>
+                        <td colspan="2"><strong>{{ restartPolicy.Name }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td>{% trans %}MaximumRetryCount{% endtrans %}</td>
+                        <td>{{ restartPolicy.MaximumRetryCount }}</td>
+                    </tr>
+                </table>
+            </div>
         </div>
-    </div>
     {% endif %}
 
     <div class="col-md-4">
@@ -167,15 +181,16 @@
             </div>
             <div class="panel-body">
                 {% if containerEntity is defined and containerEntity.user is not null %}
-                <p>{{ "Container is owned by %username%"|trans({'%username%':containerEntity.user.username}) }}</p>
-                <a href="{{ path('am_user_edit', {id:containerEntity.user.id}) }}" class="btn btn-default">{% trans %}See user{% endtrans %}</a>
+                    <p>{{ "Container is owned by %username%"|trans({'%username%':containerEntity.user.username}) }}</p>
+                    <a href="{{ path('am_user_edit', {id:containerEntity.user.id}) }}" class="btn btn-default">{% trans %}See user{% endtrans %}</a>
                 {% else %}
-                <p>{% trans %}Container is not synced with LittleShip{% endtrans %}</p>
-                <a href="{{ path('am_docker_container_sync', {id:container.id}) }}" class="btn btn-default">{% trans %}Sync with LittleShip{% endtrans %}</a>
+                    <p>{% trans %}Container is not synced with LittleShip{% endtrans %}</p>
+                    <a href="{{ path('am_docker_container_sync', {id:container.id}) }}" class="btn btn-default">{% trans %}Sync with LittleShip{% endtrans %}</a>
                 {% endif %}
             </div>
         </div>
     </div>
+
     {% if logs is defined %}
     <div class="col-md-12">
         <div class="panel panel-default logs">

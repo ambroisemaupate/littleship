@@ -1,0 +1,27 @@
+am_docker_container_listall:
+    path:     /all
+    defaults: { _controller: AMDockerBundle:Container:listAll }
+am_docker_container_add:
+    path:     /create
+    defaults: { _controller: AMDockerBundle:Container:add }
+am_docker_container_details:
+    path:     /{id}
+    defaults: { _controller: AMDockerBundle:Container:details }
+am_docker_container_start:
+    path:     /start/{id}
+    defaults: { _controller: AMDockerBundle:Container:start }
+am_docker_container_stop:
+    path:     /stop/{id}
+    defaults: { _controller: AMDockerBundle:Container:stop }
+am_docker_container_restart:
+    path:     /restart/{id}
+    defaults: { _controller: AMDockerBundle:Container:restart }
+am_docker_container_remove:
+    path:     /remove/{id}
+    defaults: { _controller: AMDockerBundle:Container:remove }
+am_docker_container_sync:
+    path:     /sync/{id}
+    defaults: { _controller: AMDockerBundle:Container:sync }
+am_docker_container_unsync:
+    path:     /unsync/{id}
+    defaults: { _controller: AMDockerBundle:Container:unsync }

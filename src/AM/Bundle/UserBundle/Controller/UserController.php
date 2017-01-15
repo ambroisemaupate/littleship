@@ -25,6 +25,10 @@
  */
 namespace AM\Bundle\UserBundle\Controller;
 
+use AM\Bundle\DockerBundle\Entity\Container;
+use AM\Bundle\UserBundle\Entity\User;
+use Docker\API\Model\ContainerConfig;
+use Docker\Manager\ContainerManager;
 use Symfony\Component\HttpFoundation\Request;
 use AM\Bundle\UserBundle\Form\UserType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -48,6 +52,11 @@ class UserController extends Controller
         return $this->render('AMUserBundle:User:list.html.twig', $assignation);
     }
 
+    /**
+     * @param Request $request
+     * @param $id
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response|\Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+     */
     public function editAction(Request $request, $id)
     {
         if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
@@ -55,23 +64,58 @@ class UserController extends Controller
         }
 
         $assignation = [];
+        $docker = $this->get('docker');
+
+        /** @var User $user */
         $user = $this->get('doctrine')
                         ->getManager()
                         ->find('AM\Bundle\UserBundle\Entity\User', $id);
 
-        $form = $this->createForm(new UserType(), $user);
-        $form->handleRequest($request);
-        if ($form->isValid()) {
+        if (null !== $user) {
+            $containers = $user->getContainers();
 
-            $this->get('doctrine')
-                        ->getManager()
-                        ->flush();
-            return $this->redirect($this->generateUrl('am_user_edit', ['id'=>$id]));
+            try {
+                /** @var ContainerManager $manager */
+                $manager = $docker->getContainerManager();
+                $existingContainersId = [];
+                $existingContainers = $manager->findAll([
+                    'all' => true,
+                ]);
+                /** @var ContainerConfig $existingContainer */
+                foreach ($existingContainers as $existingContainer) {
+                    $existingContainersId[] = $existingContainer->getId();
+                }
+
+                /** @var Container $container */
+                foreach ($containers as $container) {
+                    if (!in_array($container->getContainerId(), $existingContainersId)) {
+                        $container->setOrphan(true);
+                    }
+                }
+
+                $this->get('doctrine')
+                    ->getManager()
+                    ->flush();
+            } catch (\Exception $e) {
+
+            }
+
+            $form = $this->createForm(new UserType(), $user);
+            $form->handleRequest($request);
+            if ($form->isValid()) {
+                $this->get('doctrine')
+                    ->getManager()
+                    ->flush();
+                return $this->redirect($this->generateUrl('am_user_edit', ['id'=>$id]));
+            }
+
+            $assignation['user'] = $user;
+            $assignation['form'] = $form->createView();
+            $assignation['containers'] = $containers;
+
+            return $this->render('AMUserBundle:User:edit.html.twig', $assignation);
         }
 
-        $assignation['user'] = $user;
-        $assignation['form'] = $form->createView();
-
-        return $this->render('AMUserBundle:User:edit.html.twig', $assignation);
+        return $this->createNotFoundException('User does not exist.');
     }
 }

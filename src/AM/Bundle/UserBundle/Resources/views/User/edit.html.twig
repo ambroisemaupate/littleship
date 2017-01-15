@@ -19,17 +19,17 @@
             <h2 class="panel-title containers-title">{% trans %}Containers{% endtrans %}</h2>
         </div>
         <table class="panel-body table">
-            {% for container in user.containers %}
+            {% for container in containers %}
             <tr>
                 <td>
                     <a href="{{ path('am_docker_container_details', {'id':container.containerId}) }}">{{ container.name }}</a>
                 </td>
-                {% if container.synced %}
+                {% if not container.orphan %}
                 <td><span class="badge"><i class="glyphicon glyphicon-ok"></i> {% trans %}Synced{% endtrans %}</span></td>
-                <td><a href="{{ path('am_docker_container_unsync', {'id': container.id}) }}" class="btn btn-default btn-sm">{% trans %}Un-sync{% endtrans %}</a></td>
+                <td><a href="{{ path('am_docker_container_unsync', {'id': container.id}) }}" class="btn btn-danger btn-sm">{% trans %}Un-sync{% endtrans %}</a></td>
                 {% else %}
                 <td><span class="badge"><i class="glyphicon glyphicon-warning-sign"></i> {% trans %}Un-synced{% endtrans %}</span></td>
-                <td><a href="#" class="btn btn-primary btn-sm">{% trans %}Re-run{% endtrans %}</a></td>
+                <td><a href="{{ path('am_docker_container_unsync', {'id': container.id}) }}" class="btn btn-danger btn-sm">{% trans %}Clear{% endtrans %}</a></td>
                 {% endif %}
             </tr>
             {% else %}

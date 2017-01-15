@@ -1,0 +1,25 @@
+am_docker_usercontainer_listforusername:
+    path:     /{username}
+    defaults: { _controller: AMDockerBundle:UserContainer:listForUsername }
+    requirements:
+        username: "[0-9a-zA-Z_\-\.]+"
+am_docker_usercontainer_details:
+    path:     /details/{id}
+    defaults: { _controller: AMDockerBundle:UserContainer:details }
+    requirements:
+        id: "[0-9]+"
+am_docker_usercontainer_start:
+    path:     /start/{id}
+    defaults: { _controller: AMDockerBundle:UserContainer:start }
+    requirements:
+        id: "[0-9]+"
+am_docker_usercontainer_stop:
+    path:     /stop/{id}
+    defaults: { _controller: AMDockerBundle:UserContainer:stop }
+    requirements:
+        id: "[0-9]+"
+am_docker_usercontainer_restart:
+    path:     /restart/{id}
+    defaults: { _controller: AMDockerBundle:UserContainer:restart }
+    requirements:
+        id: "[0-9]+"

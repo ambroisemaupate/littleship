@@ -46,7 +46,7 @@ class Container
     /**
      * @var boolean
      *
-     * @ORM\Column(name="synced", type="boolean")
+     * @ORM\Column(name="synced", type="boolean", options={"default": false})
      */
     private $synced = false;
 
@@ -56,6 +56,13 @@ class Container
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $user;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="orphan", type="boolean", options={"default" : false})
+     */
+    private $orphan = false;
 
     /**
      * Get id
@@ -137,6 +144,14 @@ class Container
     }
 
     /**
+     * @return bool
+     */
+    public function isSynced()
+    {
+        return $this->getSynced();
+    }
+
+    /**
      * Gets the value of user.
      *
      * @return User
@@ -183,4 +198,23 @@ class Container
 
         return $this;
     }
+
+    /**
+     * @return bool
+     */
+    public function isOrphan()
+    {
+        return $this->orphan;
+    }
+
+    /**
+     * @param bool $orphan
+     * @return Container
+     */
+    public function setOrphan($orphan)
+    {
+        $this->orphan = $orphan;
+        return $this;
+    }
+
 }
