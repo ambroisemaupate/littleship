@@ -26,7 +26,6 @@
 namespace AM\Bundle\DockerBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use GuzzleHttp\Exception\RequestException;
 
 class DefaultController extends Controller
 {

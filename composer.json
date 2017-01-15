@@ -16,7 +16,7 @@
         "sensio/distribution-bundle": "~4.0",
         "sensio/framework-extra-bundle": "^3.0.2",
         "incenteev/composer-parameter-handler": "~2.0",
-        "docker-php/docker-php": "1.22.0",
+        "docker-php/docker-php": "~1.24.0",
         "friendsofsymfony/user-bundle": "~2.0@dev",
         "twig/extensions": "^1.3"
     },

@@ -25,6 +25,7 @@
  */
 namespace AM\Bundle\DockerBundle\Command;
 
+use Http\Client\Plugin\Exception\ClientErrorException;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
@@ -78,7 +79,7 @@ class RemoveOrphanContainersCommand extends ContainerAwareCommand
             try {
                 $realContainer = $manager->find($containerEntity->getContainerId());
                 $text .= $realContainer->getId() . " : <info>" . $realContainer->getName() . "</info>" . PHP_EOL;
-            } catch (\Http\Client\Plugin\Exception\ClientErrorException $e) {
+            } catch (ClientErrorException $e) {
                 $text .= $containerEntity->getContainerId() . " : <error>Does not exist anymore.</error>" . PHP_EOL;
                 if ($forceCommand) {
                     $em->remove($containerEntity);

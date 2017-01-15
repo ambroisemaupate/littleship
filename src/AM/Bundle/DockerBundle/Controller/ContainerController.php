@@ -159,22 +159,23 @@ class ContainerController extends Controller
             /** @var ImageManager $iManager */
             $iManager = $docker->getImageManager();
 
-            $form = $this->createForm(new ContainerType($iManager, $cManager));
+            $form = $this->createForm(new ContainerType($iManager, $cManager), [
+                'restart_policy' => 'no'
+            ]);
 
             $form->handleRequest($request);
 
             if ($form->isSubmitted() && $form->isValid()) {
-                $data = $form->getData();
-                $containerConfig = ContainerInfos::getContainerConfigFromData($data);
-
+                $containerConfig = ContainerInfos::getContainerConfigFromData($form);
+                dump($containerConfig);
                 try {
                     $containerCreateResult = $cManager->create($containerConfig, [
-                        'name' => $data['name']
+                        'name' => $form->get('name')->getData(),
                     ]);
                     $cManager->start($containerCreateResult->getId());
                     $this->get('logger')->info('New container created and started.', [
                         'id' => $containerCreateResult->getId(),
-                        'name' => $containerConfig->getNames()[0],
+                        'name' => $form->get('name')->getData(),
                     ]);
                     return $this->redirect($this->generateUrl('am_docker_container_list'));
                 } catch (ServerErrorException $e) {

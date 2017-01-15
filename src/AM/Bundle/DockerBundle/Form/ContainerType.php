@@ -29,6 +29,7 @@ use Docker\Manager\ContainerManager;
 use Docker\Manager\ImageManager;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Regex;
 
@@ -59,6 +60,26 @@ class ContainerType extends AbstractType
             ]
         ])
         ->add('image', new AvailableImagesType($this->imageManager))
+        ->add('email', 'text', [
+            'label' => 'Email',
+            'required'  => true,
+            'constraints' => [
+                new NotBlank(),
+                new Email(),
+            ]
+        ])
+        ->add('virtual_hosts', 'collection', [
+            'label' => 'Domain names:',
+            'allow_add' => true,
+            'allow_delete' => true,
+            'type' => 'text',
+            'attr' => ['class' => 'add-delete-form-type'],
+            'options'  => [
+                'required'  => false,
+                'label' => false,
+                'attr'      => ['class' => 'domain-names']
+            ]
+        ])
         ->add('env', 'collection', [
             'label' => 'Environment variables:',
             'allow_add' => true,
@@ -92,10 +113,11 @@ class ContainerType extends AbstractType
         ->add('restart_policy', 'choice', [
             'label' => 'Restart policy:',
             'placeholder' => '-- Choose a restart policy --',
+            'choices_as_values' => true,
             'choices' => [
-                'no' => 'Do not automatically restart the container',
-                'on-failure' => 'Restart only if the container exits with a non-zero exit status',
-                'always' => 'Always restart the container regardless of the exit status'
+                'Do not automatically restart the container' => 'no',
+                'Restart only if the container exits with a non-zero exit status' => 'on-failure',
+                'Always restart the container regardless of the exit status' => 'always',
             ],
             'multiple' => false,
             'required'  => true,

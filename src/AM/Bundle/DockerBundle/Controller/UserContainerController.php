@@ -32,6 +32,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 class UserContainerController extends Controller
 {
+    /**
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
     public function listAction()
     {
         if (!$this->isGranted('ROLE_USER')) {
@@ -129,6 +132,10 @@ class UserContainerController extends Controller
         return $this->render('AMDockerBundle:UserContainer:details.html.twig', $assignation);
     }
 
+    /**
+     * @param $id
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
     public function startAction($id)
     {
         if (!$this->isGranted('ROLE_USER')) {
@@ -161,6 +168,10 @@ class UserContainerController extends Controller
         ]));
     }
 
+    /**
+     * @param $id
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
     public function stopAction($id)
     {
         if (!$this->isGranted('ROLE_USER')) {
@@ -194,6 +205,10 @@ class UserContainerController extends Controller
         ]));
     }
 
+    /**
+     * @param $id
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
     public function restartAction($id)
     {
         if (!$this->isGranted('ROLE_USER')) {

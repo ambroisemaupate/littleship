@@ -31,6 +31,7 @@ use Docker\API\Model\HostConfig;
 use Docker\API\Model\RestartPolicy;
 use Docker\Manager\ContainerManager;
 use Http\Client\Common\Exception\ClientErrorException;
+use Symfony\Component\Form\Form;
 
 /**
  * Docker container wrapper class
@@ -64,38 +65,67 @@ class ContainerInfos
     }
 
     /**
-     * @param  array  $data
+     * @param Form $form
      * @return ContainerConfig
      */
-    public static function getContainerConfigFromData(array $data)
+    public static function getContainerConfigFromData(Form $form)
     {
-        $restartPolicy = new RestartPolicy();
-        $restartPolicy->setName($data['restart_policy']);
-        $restartPolicy->setMaximumRetryCount(0);
-
         $hostConfig = new HostConfig();
-        $hostConfig->setPublishAllPorts($data['publish_ports']);
-        $hostConfig->setRestartPolicy($restartPolicy);
-        if (isset($data['links']) &&
-            count($data['links']) > 0) {
-            $hostConfig->setLinks($data['links']);
-        }
-        if (isset($data['volumes_from']) && count($data['volumes_from']) > 0) {
-            $hostConfig->setVolumesFrom($data['volumes_from']);
+        $containerConfig = new ContainerConfig();
+        $containerConfig->setHostConfig($hostConfig);
+
+        if ($form->has('restart_policy')) {
+            $restartPolicy = new RestartPolicy();
+            $restartPolicy->setName($form->get('restart_policy')->getData());
+            $restartPolicy->setMaximumRetryCount(0);
+            $hostConfig->setRestartPolicy($restartPolicy);
         }
 
-        $containerConfig = new ContainerConfig();
-        $containerConfig->setExposedPorts(static::getExposedPorts($data['ports']));
-        $containerConfig->setImage($data['image']);
-        $containerConfig->setNames([$data['name']]);
+        if ($form->has('publish_ports')) {
+            $hostConfig->setPublishAllPorts((boolean) $form->get('publish_ports')->getData());
+        }
+
+        if ($form->has('links')) {
+            $links = $form->get('links')->getData();
+            if (count($links) > 0) {
+                $hostConfig->setLinks($links);
+            }
+        }
+
+        if ($form->has('volumes_from')) {
+            $volumesFrom = $form->get('volumes_from')->getData();
+            if (count($volumesFrom) > 0) {
+                $hostConfig->setVolumesFrom($volumesFrom);
+            }
+        }
+
+
+        $ports = $form->get('ports')->getData();
+
+        $containerConfig->setExposedPorts(static::getExposedPorts($ports));
+        $containerConfig->setImage($form->get('image')->getData());
+
         $containerConfig->setAttachStdin(false);
         $containerConfig->setAttachStdout(false);
         $containerConfig->setAttachStderr(false);
-        $containerConfig->setHostConfig($hostConfig);
 
         // Test if env is set and not empty before setting it
-        if (isset($data['env']) && count($data['env']) > 0) {
-            $containerConfig->setEnv($data['env']);
+        $environment = [];
+
+        if ($form->has('virtual_hosts') && $form->has('email')) {
+            $vhosts = $form->get('virtual_hosts')->getData();
+            $flattenVhosts = implode(',', $vhosts);
+            $environment[] = 'VIRTUAL_HOST=' . $flattenVhosts;
+            $environment[] = 'LETSENCRYPT_HOST=' . $flattenVhosts;
+            $environment[] = 'LETSENCRYPT_EMAIL=' . $form->get('email')->getData();
+        }
+
+        if ($form->has('env')) {
+            $environment = array_merge($environment, $form->get('env')->getData());
+        }
+
+        if (count($environment) > 0) {
+            $containerConfig->setEnv($environment);
         }
 
         return $containerConfig;
@@ -109,7 +139,7 @@ class ContainerInfos
     {
         $exposedPorts = [];
         foreach ($ports as $port) {
-            $exposedPorts[$port] = [];
+            $exposedPorts[$port] = new \ArrayObject();
         }
         return new \ArrayObject($exposedPorts);
     }
@@ -163,8 +193,6 @@ class ContainerInfos
         } else {
             $assignation['ports'] = $this->container->getHostConfig()->getPortBindings();
         }
-
-        //$this->getLogsAssignation($manager, $assignation);
 
         return $assignation;
     }
