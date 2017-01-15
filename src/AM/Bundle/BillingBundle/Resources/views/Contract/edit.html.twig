@@ -1,0 +1,28 @@
+{% extends 'default/index.html.twig' %}
+
+{% set cRoute = app.request.attributes.get('_route') %}
+
+{% block title %}{% trans %}User contracts{% endtrans %}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="navbar-form navbar-right">
+        <div class="form-group">
+
+        </div>
+    </div>
+    <h1>{{ user.username }} — {% trans %}Contracts{% endtrans %}</h1>
+</div>
+
+<div class="edit-contract col-md-6">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h2 class="panel-title containers-title">{% trans %}Edit a contract{% endtrans %}</h2>
+        </div>
+        <div class="panel-body">
+            {{ form(editContractForm) }}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

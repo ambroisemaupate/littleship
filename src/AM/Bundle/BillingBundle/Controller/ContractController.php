@@ -32,6 +32,11 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 class ContractController extends Controller
 {
+    /**
+ * @param Request $request
+ * @param $userId
+ * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+ */
     public function indexAction(Request $request, $userId)
     {
         if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
@@ -39,19 +44,19 @@ class ContractController extends Controller
         }
 
         $user = $this->get('doctrine')
-                        ->getManager()
-                        ->find('AM\Bundle\UserBundle\Entity\User', $userId);
+            ->getManager()
+            ->find('AM\Bundle\UserBundle\Entity\User', $userId);
 
         if (null === $user) {
             throw $this->createNotFoundException();
         }
 
         $contracts = $this->get('doctrine')
-                        ->getManager()
-                        ->getRepository('AM\Bundle\BillingBundle\Entity\Contract')
-                        ->findBy([
-                            'user' => $user
-                        ]);
+            ->getManager()
+            ->getRepository('AM\Bundle\BillingBundle\Entity\Contract')
+            ->findBy([
+                'user' => $user
+            ]);
 
         $newContract = new Contract($user);
         $addContractForm = $this->createForm(new ContractType(), $newContract);
@@ -59,11 +64,11 @@ class ContractController extends Controller
         $addContractForm->handleRequest($request);
         if ($addContractForm->isValid()) {
             $this->get('doctrine')
-                        ->getManager()
-                        ->persist($newContract);
+                ->getManager()
+                ->persist($newContract);
             $this->get('doctrine')
-                        ->getManager()
-                        ->flush();
+                ->getManager()
+                ->flush();
 
             return $this->redirect($this->generateUrl('am_billing_contracts', ['userId'=>$userId]));
         }
@@ -72,6 +77,97 @@ class ContractController extends Controller
             'user' => $user,
             'contracts' => $contracts,
             'addContractForm' => $addContractForm->createView(),
+        ));
+    }
+
+    /**
+     * @param Request $request
+     * @param $userId
+     * @param $contractId
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function editAction(Request $request, $userId, $contractId)
+    {
+        if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $user = $this->get('doctrine')
+            ->getManager()
+            ->find('AM\Bundle\UserBundle\Entity\User', $userId);
+
+        $contract = $this->get('doctrine')
+            ->getManager()
+            ->find('AM\Bundle\BillingBundle\Entity\Contract', $contractId);
+
+        if (null === $user) {
+            throw $this->createNotFoundException('User not found');
+        }
+        if (null === $contract) {
+            throw $this->createNotFoundException('Contract not found');
+        }
+
+        $editContractForm = $this->createForm(new ContractType(), $contract, array(
+            'button_label' => 'Edit contract',
+        ));
+        $editContractForm->handleRequest($request);
+        if ($editContractForm->isValid()) {
+            $this->get('doctrine')
+                ->getManager()
+                ->flush();
+
+            return $this->redirect($this->generateUrl('am_billing_contracts', ['userId'=>$userId]));
+        }
+
+        return $this->render('AMBillingBundle:Contract:edit.html.twig', array(
+            'user' => $user,
+            'editContractForm' => $editContractForm->createView(),
+        ));
+    }
+
+    /**
+     * @param Request $request
+     * @param $userId
+     * @param $contractId
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function deleteAction(Request $request, $userId, $contractId)
+    {
+        if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $user = $this->get('doctrine')
+            ->getManager()
+            ->find('AM\Bundle\UserBundle\Entity\User', $userId);
+
+        $contract = $this->get('doctrine')
+            ->getManager()
+            ->find('AM\Bundle\BillingBundle\Entity\Contract', $contractId);
+
+        if (null === $user) {
+            throw $this->createNotFoundException('User not found');
+        }
+        if (null === $contract) {
+            throw $this->createNotFoundException('Contract not found');
+        }
+
+        $deleteContractForm = $this->createForm('form');
+        $deleteContractForm->handleRequest($request);
+        if ($deleteContractForm->isValid()) {
+            $this->get('doctrine')
+                ->getManager()
+                ->remove($contract);
+            $this->get('doctrine')
+                ->getManager()
+                ->flush();
+
+            return $this->redirect($this->generateUrl('am_billing_contracts', ['userId'=>$userId]));
+        }
+
+        return $this->render('AMBillingBundle:Contract:delete.html.twig', array(
+            'user' => $user,
+            'deleteContractForm' => $deleteContractForm->createView(),
         ));
     }
 }

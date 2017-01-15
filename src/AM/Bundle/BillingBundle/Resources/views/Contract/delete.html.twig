@@ -1,0 +1,35 @@
+{% extends 'default/index.html.twig' %}
+
+{% set cRoute = app.request.attributes.get('_route') %}
+
+{% block title %}{% trans %}User contracts{% endtrans %}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="navbar-form navbar-right">
+        <div class="form-group">
+
+        </div>
+    </div>
+    <h1>{{ user.username }} — {% trans %}Contracts{% endtrans %}</h1>
+</div>
+
+<div class="edit-contract col-md-6">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h2 class="panel-title containers-title">{% trans %}Delete a contract{% endtrans %}</h2>
+        </div>
+        <div class="panel-body">
+            {{ form_start(deleteContractForm) }}
+            {{ form_widget(deleteContractForm) }}
+
+            <div class="form-group">
+                <a href="{{ path('am_billing_contracts', {userId: user.id}) }}" class="btn btn-default">{% trans %}Cancel{% endtrans %}</a>
+                <button class="btn btn-danger" type="submit">{% trans %}Confirm contract deletion{% endtrans %}</button>
+            </div>
+            {{ form_end(deleteContractForm) }}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

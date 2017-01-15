@@ -25,10 +25,9 @@
  */
 namespace AM\Bundle\DockerBundle\Form;
 
-use Docker\Manager\ImageManager;
 use Docker\Manager\ContainerManager;
+use Docker\Manager\ImageManager;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 use Symfony\Component\Form\FormBuilderInterface;
 
 /**

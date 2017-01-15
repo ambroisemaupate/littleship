@@ -3,6 +3,18 @@ am_billing_contracts:
     defaults: { _controller: AMBillingBundle:Contract:index }
     requirements:
         userId: "[0-9]+"
+am_billing_contracts_edit:
+    path:     /user/{userId}/contracts/{contractId}/edit
+    defaults: { _controller: AMBillingBundle:Contract:edit }
+    requirements:
+        userId: "[0-9]+"
+        contractId: "[0-9]+"
+am_billing_contracts_delete:
+    path:     /user/{userId}/contracts/{contractId}/delete
+    defaults: { _controller: AMBillingBundle:Contract:delete }
+    requirements:
+        userId: "[0-9]+"
+        contractId: "[0-9]+"
 
 am_billing_review:
     path:     /billing

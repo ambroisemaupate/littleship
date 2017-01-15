@@ -30,7 +30,7 @@ class ContractType extends AbstractType
                 'choices' => Contract::$typeToHuman,
             ])
             ->add('submit', 'submit', [
-                'label' => 'Create contract',
+                'label' => $options['button_label'],
             ]);
     }
 
@@ -40,7 +40,12 @@ class ContractType extends AbstractType
     public function setDefaultOptions(OptionsResolverInterface $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => 'AM\Bundle\BillingBundle\Entity\Contract'
+            'data_class' => 'AM\Bundle\BillingBundle\Entity\Contract',
+            'button_label' => 'Create contract',
+        ));
+
+        $resolver->addAllowedTypes(array(
+            'button_label' => 'string',
         ));
     }
 
