@@ -29,6 +29,8 @@ use Docker\Manager\ContainerManager;
 use Docker\Manager\ImageManager;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Regex;
 
 /**
  * ContainerType.
@@ -49,12 +51,14 @@ class ContainerType extends AbstractType
         $builder->add('name', 'text', [
             'label' => 'Name',
             'required'  => true,
+            'constraints' => [
+                new NotBlank(),
+                new Regex([
+                    'pattern' => '#^[a-zA-Z0-9_\-]+$#'
+                ]),
+            ]
         ])
-        ->add('image', new AvailableImagesType($this->imageManager), [
-            'label' => 'Run from image:',
-            'empty_value' => 'Choose an image',
-            'required'  => true,
-        ])
+        ->add('image', new AvailableImagesType($this->imageManager))
         ->add('env', 'collection', [
             'label' => 'Environment variables:',
             'allow_add' => true,
@@ -74,30 +78,20 @@ class ContainerType extends AbstractType
             'type' => 'text',
             'attr' => ['class' => 'add-delete-form-type'],
             'options'  => [
-                'required'  => false,
+                'required' => false,
                 'label' => false,
-                'attr'      => ['class' => 'port']
+                'attr' => ['class' => 'port']
             ]
         ])
         ->add('publish_ports', 'checkbox', [
             'label' => 'Publish all exposed ports',
             'required'  => false,
         ])
-        ->add('volumes_from', new AvailableContainersType($this->containerManager), [
-            'label' => 'Use volumes from:',
-            'empty_value' => 'None',
-            'multiple' => true,
-            'required'  => false,
-        ])
-        ->add('links', new AvailableLinksType($this->containerManager), [
-            'label' => 'Link container to:',
-            'empty_value' => 'None',
-            'multiple' => true,
-            'required'  => false,
-        ])
+        ->add('volumes_from', new AvailableContainersType($this->containerManager))
+        ->add('links', new AvailableLinksType($this->containerManager))
         ->add('restart_policy', 'choice', [
             'label' => 'Restart policy:',
-            'empty_value' => '-- Choose a restart policy --',
+            'placeholder' => '-- Choose a restart policy --',
             'choices' => [
                 'no' => 'Do not automatically restart the container',
                 'on-failure' => 'Restart only if the container exits with a non-zero exit status',

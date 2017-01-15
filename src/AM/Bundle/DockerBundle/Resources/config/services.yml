@@ -5,18 +5,18 @@ parameters:
 
 services:
     docker.client:
-        class: Docker\Http\DockerClient
+        class: Docker\DockerClient
         arguments:
-            config:
-                stream_context_options:
-                    ssl:
-                        cafile: %docker_cert_path%/ca.pem
-                        local_cert: %docker_cert_path%/cert.pem
-                        local_pk: %docker_cert_path%/key.pem
+            stream_context_options:
+                ssl:
+                    cafile: %docker_cert_path%/ca.pem
+                    local_cert: %docker_cert_path%/cert.pem
+                    local_pk: %docker_cert_path%/key.pem
             remote_socket: %docker_entrypoint%
             ssl: %docker_ssl%
 
     docker:
         class: Docker\Docker
         arguments:
-            - @docker.client
+          httpClient: @docker.client
+

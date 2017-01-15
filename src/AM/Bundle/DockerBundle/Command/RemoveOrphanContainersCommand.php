@@ -41,7 +41,7 @@ class RemoveOrphanContainersCommand extends ContainerAwareCommand
     protected function configure()
     {
         $this
-            ->setName('containers:remove-orphans')
+            ->setName('docker:remove-orphans')
             ->setDescription('Remove database container references if their Docker containers do not exist anymore.')
             ->addOption(
                 'force',
@@ -55,12 +55,11 @@ class RemoveOrphanContainersCommand extends ContainerAwareCommand
     {
         $text = "";
         $em = $this->getContainer()->get('doctrine')->getManager();
-
         $docker = $this->getContainer()->get('docker');
         $manager = $docker->getContainerManager();
 
         $helper = $this->getHelper('question');
-        $question = new ConfirmationQuestion('Do you want to remove every orphan containers references?', false);
+        $question = new ConfirmationQuestion('<question>Do you want to remove every orphan containers references?</question> [y|N] ', false);
 
         if (!$helper->ask($input, $output, $question)) {
             return;
@@ -76,13 +75,11 @@ class RemoveOrphanContainersCommand extends ContainerAwareCommand
         $progress->start();
         $text .= PHP_EOL;
         foreach ($containerEntities as $key => $containerEntity) {
-            $realContainer = $manager->find($containerEntity->getContainerId());
-
-            if (is_object($realContainer)) {
+            try {
+                $realContainer = $manager->find($containerEntity->getContainerId());
                 $text .= $realContainer->getId() . " : <info>" . $realContainer->getName() . "</info>" . PHP_EOL;
-            } else {
+            } catch (\Http\Client\Plugin\Exception\ClientErrorException $e) {
                 $text .= $containerEntity->getContainerId() . " : <error>Does not exist anymore.</error>" . PHP_EOL;
-
                 if ($forceCommand) {
                     $em->remove($containerEntity);
                     $em->flush();
@@ -94,7 +91,6 @@ class RemoveOrphanContainersCommand extends ContainerAwareCommand
         }
 
         $progress->finish();
-
         $output->writeln($text);
     }
 }

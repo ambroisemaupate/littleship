@@ -1,10 +1,6 @@
 {% extends 'default/index.html.twig' %}
 
-{% set running = container.runtimeInformations.State.Running %}
-{% set ports = container.runtimeInformations.NetworkSettings.Ports %}
-{% set image = container.runtimeInformations.Config.Image %}
-
-{% block title %}{% trans %}Container details:{% endtrans %} {{ container.runtimeInformations.Name }}{% endblock %}
+{% block title %}{% trans %}Container details:{% endtrans %} {{ container.name }}{% endblock %}
 
 {% block content %}
 <div class="page-header">
@@ -25,7 +21,7 @@
         {% else %}
         <i class="glyphicon glyphicon-ban-circle"></i>
         {% endif %}
-        <span class="container-name">{{ container.runtimeInformations.Name }}</span> <small>{{ image }}</small>
+        <span class="container-name">{{ container.name }}</span> <small>{{ image }}</small>
     </h1>
 </div>
 <section class="row container-details">
@@ -37,7 +33,7 @@
                     <td>{% trans %}CreatedAt{% endtrans %}</td>
                     <td>{{ Created|localizeddate('full', 'medium') }} — {{ Age.format('%a day(s), %h hour(s), %i minute(s)'|trans) }}</td>
                 </tr>
-                {% if container.runtimeInformations.State.Running %}
+                {% if running %}
                 <tr>
                     <td>{% trans %}Running{% endtrans %}</td>
                     <td><i class="glyphicon glyphicon-ok"></i> {{ RunningAge.format('%a day(s), %h hour(s), %i minute(s)'|trans) }}</td>
@@ -57,9 +53,9 @@
                 </tr>
                 {% endif %}
 
-                {% if container.runtimeInformations.State.Dead %}
+                {% if container.state.oOMKilled %}
                 <tr>
-                    <td>{% trans %}Dead{% endtrans %}</td>
+                    <td>{% trans %}oOMKilled{% endtrans %}</td>
                     <td><i class="glyphicon glyphicon-ok"></i></td>
                 </tr>
                 {% endif %}
@@ -68,7 +64,7 @@
         <div class="panel panel-default env">
             <div class="panel-heading"><h3 class="panel-title">{% trans %}Environment variables{% endtrans %}</h3></div>
             <table class="table">
-                {% for envVar in container.runtimeInformations.Config.Env %}
+                {% for envVar in container.config.env %}
                 {% set envVarArray = envVar|split('=') %}
                 <tr>
                     <td class="env-name">{{ envVarArray[0] }}</td>
@@ -78,16 +74,27 @@
             </table>
         </div>
     </div>
+    {% if container.mounts is defined and container.mounts|length > 0 %}
     <div class="col-md-12">
         <div class="panel panel-default volumes">
             <div class="panel-heading"><h3 class="panel-title">{% trans %}Volumes{% endtrans %}</h3></div>
             <table class="table">
-                {% for intern, extern in container.runtimeInformations.Volumes %}
-                <tr><td>{{ intern }}</td><td>{{ extern }}</td></tr>
+                    <tr>
+                        <th>{% trans %}Source{% endtrans %}</th>
+                        <th>{% trans %}Destination{% endtrans %}</th>
+                        <th>{% trans %}RW{% endtrans %}</th>
+                    </tr>
+                {% for mount in container.mounts %}
+                    <tr>
+                        <td>{{ mount.source }}</td>
+                        <td>{{ mount.destination }}</td>
+                        <td>{{ mount.rW }}</td>
+                    </tr>
                 {% endfor %}
             </table>
         </div>
     </div>
+    {% endif %}
 
     {% if linkedContainers is defined %}
     <div class="col-md-4">
@@ -169,13 +176,17 @@
             </div>
         </div>
     </div>
-    {% if logs|length > 0 %}
+    {% if logs is defined %}
     <div class="col-md-12">
         <div class="panel panel-default logs">
             <div class="panel-heading"><h3 class="panel-title">{% trans %}Logs{% endtrans %}</h3></div>
             <div class="panel-body code">
                 {% for log in logs %}
-                {{ log.output|nl2br }}
+                    {% if log.output is defined %}
+                    {{ log.output|nl2br }}
+                    {% else %}
+                    {{ log|nl2br }}
+                    {% endif %}
                 {% endfor %}
             </div>
         </div>

@@ -28,6 +28,7 @@ namespace AM\Bundle\DockerBundle\Controller;
 use AM\Bundle\DockerBundle\Docker\ContainerInfos;
 use Docker\Container;
 use GuzzleHttp\Exception\RequestException;
+use Http\Client\Plugin\Exception\ClientErrorException;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 class UserContainerController extends Controller
@@ -50,8 +51,8 @@ class UserContainerController extends Controller
                 $assignation['containers'][] = $manager->find($container->getContainerId());
             }
 
-        } catch (RequestException $e) {
-            $assignation['error'] = $e->getMessage();
+        } catch (ClientErrorException $e) {
+            $assignation['error'] = $e->getResponse()->getBody();
         }
 
         return $this->render('AMDockerBundle:UserContainer:list.html.twig', $assignation);

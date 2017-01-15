@@ -26,7 +26,7 @@
 namespace AM\Bundle\DockerBundle\Entity;
 
 use AM\Bundle\UserBundle\Entity\User;
-use AM\Bundle\DockerBundle\Entity\Template;
+
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -74,8 +74,10 @@ class TemplateInstance
      */
     private $template;
 
+
     /**
-     *
+     * @param \AM\Bundle\DockerBundle\Entity\Template $template
+     * @return $this
      */
     public function setTemplate(Template $template)
     {
@@ -106,7 +108,8 @@ class TemplateInstance
     private $user;
 
     /**
-     *
+     * @param User $user
+     * @return $this
      */
     public function setUser(User $user)
     {

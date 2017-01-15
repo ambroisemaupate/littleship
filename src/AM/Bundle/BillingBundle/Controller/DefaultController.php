@@ -26,7 +26,7 @@
 namespace AM\Bundle\BillingBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
-use AM\Bundle\BillingBundle\Form\ContractType;
+
 use AM\Bundle\BillingBundle\Entity\Contract;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 

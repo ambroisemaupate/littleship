@@ -29,10 +29,14 @@ use AM\Bundle\DockerBundle\Docker\ContainerInfos;
 use AM\Bundle\DockerBundle\Entity\Container as ContainerEntity;
 use AM\Bundle\DockerBundle\Form\ContainerEntityType;
 use AM\Bundle\DockerBundle\Form\ContainerType;
-use Docker\Container;
+
+use Docker\API\Model\ContainerConfig;
+
+
 use GuzzleHttp\Exception\RequestException;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Form\FormError;
 
 /**
  * Description.
@@ -88,7 +92,6 @@ class ContainerController extends Controller
         $assignation = [];
 
         if (null !== $container) {
-
             $em = $this->get('doctrine')->getManager();
             $containerEntity = $em->getRepository('AM\Bundle\DockerBundle\Entity\Container')
                 ->findOneByContainerId($id);
@@ -122,47 +125,23 @@ class ContainerController extends Controller
 
             $form->handleRequest($request);
 
-            if ($form->isValid()) {
+            if ($form->isSubmitted() && $form->isValid()) {
                 $data = $form->getData();
+                $containerConfig = ContainerInfos::getContainerConfigFromData($data);
 
-                $configuration = [
-                    'HostConfig' => [
-                        'PublishAllPorts' => (boolean) $data['publish_ports'],
-                        'RestartPolicy' => [
-                            'Name' => $data['restart_policy'],
-                            'MaximumRetryCount' => 0,
-                        ],
-                    ],
-                ];
-                if (isset($data['links']) && count($data['links']) > 0) {
-                    $configuration['HostConfig']['Links'] = $data['links'];
+                try {
+                    $containerCreateResult = $cManager->create($containerConfig, [
+                        'name' => $data['name']
+                    ]);
+                    $cManager->start($containerCreateResult->getId());
+                    $this->get('logger')->info('New container created and started.', [
+                        'id' => $containerCreateResult->getId(),
+                        'name' => $containerConfig->getNames()[0],
+                    ]);
+                    return $this->redirect($this->generateUrl('am_docker_container_list'));
+                } catch (\Http\Client\Plugin\Exception\ServerErrorException $e) {
+                    $form->addError(new FormError($e->getResponse()->getBody()->getContents()));
                 }
-                if (isset($data['volumes_from']) && count($data['volumes_from']) > 0) {
-                    $configuration['HostConfig']['VolumesFrom'] = $data['volumes_from'];
-                }
-                $exposedPorts = $this->getExposedPorts($data['ports']);
-
-                $newCont = new Container($configuration);
-                $newCont->setImage($data['image']);
-
-                // Test if exposed ports are set and not empty before setting it
-                if (count($exposedPorts) > 0) {
-                    $newCont->setExposedPorts($exposedPorts);
-                }
-                $newCont->setName($data['name']);
-
-                // Test if env is set and not empty before setting it
-                if (isset($data['env']) && count($data['env']) > 0) {
-                    $newCont->setEnv($data['env']);
-                }
-
-                $cManager->run($newCont, null, [], true);
-                $this->get('logger')->info('New container created', [
-                    'name' => $newCont->getName(),
-                    'config' => $newCont->getConfig(),
-                ]);
-
-                return $this->redirect($this->generateUrl('am_docker_container_list'));
             }
 
             $assignation['form'] = $form->createView();
@@ -171,16 +150,6 @@ class ContainerController extends Controller
         }
 
         return $this->render('AMDockerBundle:Container:add.html.twig', $assignation);
-    }
-
-    protected function getExposedPorts(array &$ports)
-    {
-        $expPorts = [];
-        foreach ($ports as $port) {
-            $expPorts[$port] = [];
-        }
-
-        return $expPorts;
     }
 
     public function startAction($id)
@@ -195,7 +164,7 @@ class ContainerController extends Controller
         if (null !== $container) {
             $infos = new ContainerInfos($container);
             if (!$infos->isRunning()) {
-                $manager->start($container);
+                $manager->start($container->getId());
                 $this->get('logger')->info('Started container', [
                     'name' => $container->getName(),
                     'config' => $container->getConfig(),
@@ -220,9 +189,10 @@ class ContainerController extends Controller
         $container = $manager->find($id);
 
         if (null !== $container) {
-            $infos = new ContainerInfos($container);
-            if ($infos->isRunning()) {
-                $manager->stop($container, 2);
+            if ($container->getState()->getRunning()) {
+                $manager->stop($container->getId(), [
+                    't' => 2
+                ]);
                 $this->get('logger')->info('Stopped container', [
                     'name' => $container->getName(),
                     'config' => $container->getConfig(),
@@ -247,9 +217,8 @@ class ContainerController extends Controller
         $container = $manager->find($id);
 
         if (null !== $container) {
-            $infos = new ContainerInfos($container);
-            if ($infos->isRunning()) {
-                $manager->restart($container);
+            if ($container->getState()->getRunning()) {
+                $manager->restart($container->getId());
                 $this->get('logger')->info('Restarted container', [
                     'name' => $container->getName(),
                     'config' => $container->getConfig(),
@@ -285,14 +254,12 @@ class ContainerController extends Controller
                 ->getForm();
             $form->handleRequest($request);
 
-            if ($form->isValid()) {
-
+            if ($form->isSubmitted() && $form->isValid()) {
                 // remove container
-                $infos = new ContainerInfos($container);
-                if ($infos->isRunning()) {
-                    $manager->kill($container);
+                if ($container->getState()->getRunning()) {
+                    $manager->kill($container->getId());
                 }
-                $manager->remove($container);
+                $manager->remove($container->getId());
 
                 // unsync container entity
                 $em = $this->get('doctrine')->getManager();
@@ -331,13 +298,13 @@ class ContainerController extends Controller
             $infos = new ContainerInfos($container);
             $containerEntity = new ContainerEntity();
             $containerEntity->setContainerId($id);
-            $containerEntity->setConfiguration(serialize($container->getRuntimeInformations()));
-            $containerEntity->setName($container->getRuntimeInformations()['Name']);
+            $containerEntity->setConfiguration(serialize($container));
+            $containerEntity->setName($container->getName());
 
             $form = $this->createForm(new ContainerEntityType(), $containerEntity);
             $form->handleRequest($request);
 
-            if ($form->isValid()) {
+            if ($form->isSubmitted() && $form->isValid()) {
                 $containerEntity->setSynced(true);
                 $em = $this->get('doctrine')->getManager();
                 $em->persist($containerEntity);
@@ -387,7 +354,7 @@ class ContainerController extends Controller
             ->getForm();
         $form->handleRequest($request);
 
-        if ($form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $em->remove($containerEntity);
             $em->flush();
             return $this->redirect($this->generateUrl('am_docker_container_details', ['id' => $containerEntity->getContainerId()]));

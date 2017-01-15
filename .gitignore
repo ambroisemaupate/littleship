@@ -17,8 +17,6 @@ composer.lock
 # NFS share ghost files
 ._*
 
-
-
 # Created by https://www.gitignore.io/api/phpstorm
 
 ### PhpStorm ###
@@ -74,3 +72,4 @@ fabric.properties
 # *.ipr
 
 # End of https://www.gitignore.io/api/phpstorm
+
