@@ -49,12 +49,13 @@ class AvailableContainersType extends AbstractType
         $options = [];
 
         foreach ($containers as $container) {
-            $name = $container->getNames()[0];
+            $name = preg_replace('#/?([a-zA-Z\_\-0-9])#', '$1', $container->getNames()[0]);
             $options[$name] = $name;
         }
 
         $resolver->setDefaults(array(
             'choices' => $options,
+            'choices_as_values' => true,
             'label' => 'Use volumes from:',
             'placeholder' => 'None',
             'multiple' => true,

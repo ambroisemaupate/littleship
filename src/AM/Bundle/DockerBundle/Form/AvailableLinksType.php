@@ -49,21 +49,23 @@ class AvailableLinksType extends AbstractType
         $options = [];
 
         foreach ($containers as $container) {
-            $name = $container->getNames()[0];
             $imageName = $container->getImage();
             $imageName = explode(':', $imageName);
             $repository = explode('/', $imageName[0]);
+
+            $name = preg_replace('#/?([a-zA-Z\_\-0-9])#', '$1', $container->getNames()[0]);
 
             if (isset($repository[1])) {
                 $linkName = $name . ':' . $repository[1];
             } else {
                 $linkName = $name . ':' . $repository[0];
             }
-            $options[$linkName] = $linkName;
+            $options[$name] = $linkName;
         }
 
         $resolver->setDefaults(array(
             'choices' => $options,
+            'choices_as_values' => true,
             'label' => 'Link container to:',
             'placeholder' => 'None',
             'multiple' => true,

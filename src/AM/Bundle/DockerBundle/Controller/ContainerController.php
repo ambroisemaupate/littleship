@@ -26,17 +26,19 @@
 namespace AM\Bundle\DockerBundle\Controller;
 
 use AM\Bundle\DockerBundle\Docker\ContainerInfos;
-use AM\Bundle\DockerBundle\Entity\Container as ContainerEntity;
 use AM\Bundle\DockerBundle\Entity\Container;
+use AM\Bundle\DockerBundle\Entity\Container as ContainerEntity;
 use AM\Bundle\DockerBundle\Form\ContainerEntityType;
-use AM\Bundle\DockerBundle\Form\ContainerType;
+use AM\Bundle\DockerBundle\Form\Docker\ContainerConfigType;
 use AM\Bundle\UserBundle\Entity\User;
+use Docker\API\Model\ContainerConfig;
+use Docker\API\Model\HostConfig;
+use Docker\API\Model\RestartPolicy;
 use Docker\Manager\ContainerManager;
 use Docker\Manager\ImageManager;
 use Doctrine\ORM\EntityManager;
-use Http\Client\Common\Exception\ServerErrorException;
+use Http\Client\Common\Exception\ClientErrorException;
 use Http\Client\Exception\RequestException;
-use Http\Client\Plugin\Exception\ClientErrorException;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
@@ -159,15 +161,28 @@ class ContainerController extends Controller
             /** @var ImageManager $iManager */
             $iManager = $docker->getImageManager();
 
-            $form = $this->createForm(new ContainerType($iManager, $cManager), [
-                'restart_policy' => 'no'
+            $hostConfig = new HostConfig();
+            $hostConfig->setNetworkMode('bridge');
+
+            $containerConfig = new ContainerConfig();
+            $containerConfig->setAttachStdin(false);
+            $containerConfig->setAttachStdout(false);
+            $containerConfig->setAttachStderr(false);
+            $containerConfig->setHostConfig($hostConfig);
+
+            $restartPolicy = new RestartPolicy();
+            $restartPolicy->setMaximumRetryCount(1);
+            $restartPolicy->setName('no');
+            $hostConfig->setRestartPolicy($restartPolicy);
+
+            $form = $this->createForm(new ContainerConfigType(), $containerConfig, [
+                'imageManager' => $iManager,
+                'containerManager' =>$cManager
             ]);
 
             $form->handleRequest($request);
 
             if ($form->isSubmitted() && $form->isValid()) {
-                $containerConfig = ContainerInfos::getContainerConfigFromData($form);
-                dump($containerConfig);
                 try {
                     $containerCreateResult = $cManager->create($containerConfig, [
                         'name' => $form->get('name')->getData(),
@@ -178,8 +193,12 @@ class ContainerController extends Controller
                         'name' => $form->get('name')->getData(),
                     ]);
                     return $this->redirect($this->generateUrl('am_docker_container_list'));
-                } catch (ServerErrorException $e) {
-                    $form->addError(new FormError($e->getResponse()->getBody()->getContents()));
+                } catch (RequestException $e) {
+                    if ($e->getMessage() == 'Conflict') {
+                        $form->addError(new FormError('"' . $form->get('name')->getData() . '" container name already exists!'));
+                    } else {
+                        $form->addError(new FormError('[' . get_class($e) . '] ' . $e->getMessage()));
+                    }
                 }
             }
 
@@ -348,7 +367,6 @@ class ContainerController extends Controller
         $container = $manager->find($id);
 
         if (null !== $container) {
-            $infos = new ContainerInfos($container);
             $containerEntity = new ContainerEntity();
             $containerEntity->setContainerId($id);
             $containerEntity->setConfiguration(serialize($container));
@@ -373,6 +391,11 @@ class ContainerController extends Controller
         }
     }
 
+    /**
+     * @param Request $request
+     * @param $id
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     */
     public function unsyncAction(Request $request, $id)
     {
         if (!$this->isGranted('ROLE_SUPER_ADMIN')) {

@@ -9,7 +9,12 @@
 </div>
 {% if form is defined %}
     {% form_theme form 'bootstrap_3_layout.html.twig' %}
-    {{ form(form) }}
+    {{ form_start(form) }}
+    {{ form_widget(form) }}
+    <div class="form-group">
+        <button class="btn btn-primary" type="submit"><i class="fa fa-plus"></i> {% trans %}Create container{% endtrans %}</button>
+    </div>
+    {{ form_end(form) }}
 {% else %}
     <div class="alert alert-danger" role="alert">
         <p><i class="glyphicon glyphicon-exclamation-sign"></i> <strong>{% trans %}LittleShip could not connect to your Docker…{% endtrans %}</strong></p>
